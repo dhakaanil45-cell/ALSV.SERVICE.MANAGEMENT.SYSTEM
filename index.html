@@ -569,7 +569,7 @@ function restore(ev){
 let dip=null;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dip=e;$('instBtn').style.display='inline-block';});
 function doInstall(){if(!dip)return;dip.prompt();dip.userChoice.then(()=>{dip=null;$('instBtn').style.display='none';});}
-if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});});}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('service-worker.js').catch(()=>{});});}
 renderAll();
 </script>
 </body>
