@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ARMADO TRACK — Mahindra Armado Service Tracker</title>
+<meta name="theme-color" content="#0f1e35">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ARMADO TRACK">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Teko:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0f1a;--panel:#0f1923;--card:#080e18;--border:#1a2d45;--accent:#3b82f6;--green:#10b981;--danger:#ef4444;--warn:#f97316;--text:#e2e8f0;--muted:#7b8ba3;--gold:#fbbf24}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',system-ui,sans-serif;font-size:15px;min-height:100vh}
+button{font-family:inherit;cursor:pointer}
+.mono{font-family:'Share Tech Mono',ui-monospace,monospace}
+header{position:sticky;top:0;z-index:50;background:linear-gradient(135deg,#0a1628,#0f1e35);border-bottom:2px solid var(--accent);padding:12px 16px;padding-top:calc(12px + env(safe-area-inset-top));display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-i{width:38px;height:38px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:20px}
+.logo-t{font-family:'Teko',sans-serif;font-size:25px;font-weight:600;letter-spacing:2px;color:var(--accent);line-height:1}
+.logo-s{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+.hb{display:flex;gap:6px}
+.btn{border:none;border-radius:8px;padding:8px 13px;font-size:13px;font-weight:700;letter-spacing:.5px}
+.btn-p{background:var(--accent);color:#fff}
+.btn-g{background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.35)}
+.btn-ok{background:var(--green);color:#04130d}
+.btn-o{background:transparent;color:var(--muted);border:1px solid var(--border)}
+.btn-d{background:rgba(239,68,68,.12);color:var(--danger);border:1px solid rgba(239,68,68,.3)}
+.btn-s{padding:4px 10px;font-size:11px}
+.bar{background:rgba(59,130,246,.06);border-bottom:1px solid rgba(59,130,246,.15);padding:6px 16px;font-size:11px;color:var(--accent)}
+main{max-width:1000px;margin:0 auto;padding:14px 14px 90px}
+#banner{display:none;margin-bottom:14px;border:1px solid rgba(239,68,68,.45);background:linear-gradient(135deg,#1a0a0a,#1f1010);border-radius:12px;overflow:hidden}
+#banner.warn{border-color:rgba(249,115,22,.5);background:linear-gradient(135deg,#1a1000,#1f1500)}
+.bn-h{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;cursor:pointer}
+.bn-t{font-family:'Teko',sans-serif;font-size:18px;letter-spacing:1px;color:var(--danger)}
+#banner.warn .bn-t{color:var(--warn)}
+.bn-c{background:var(--danger);color:#fff;border-radius:20px;padding:1px 9px;font-size:12px;font-weight:700;margin-left:8px}
+#banner.warn .bn-c{background:var(--warn)}
+#bnItems{display:none;padding:0 12px 12px;flex-direction:column;gap:6px}
+#bnItems.open{display:flex}
+.bn-i{background:rgba(255,255,255,.04);border-radius:9px;padding:8px 11px;cursor:pointer}
+.bn-i b{font-size:14px}
+.bn-i div{font-size:12px;color:#cbd5e1;margin-top:2px}
+.sum{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.sc{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:10px 12px;border-top:3px solid var(--accent)}
+.sc.g{border-top-color:var(--green)}.sc.w{border-top-color:var(--warn)}.sc.r{border-top-color:var(--danger)}
+.sc small{display:block;font-size:9px;letter-spacing:1.3px;color:var(--muted);text-transform:uppercase}
+.sc span{font-family:'Teko',sans-serif;font-size:28px;line-height:1.1}
+.sc.g span{color:var(--green)}.sc.w span{color:var(--warn)}.sc.r span{color:var(--danger)}
+.sc:first-child span{color:var(--accent)}
+.box{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px}
+.h2{font-family:'Teko',sans-serif;font-size:20px;letter-spacing:1.5px;color:var(--accent);margin-bottom:10px}
+.srow{display:flex;gap:8px}
+.inp,select.inp{background:#1a2638;border:1px solid #33465f;border-radius:8px;padding:9px 12px;color:var(--text);font-family:inherit;font-size:15px;font-weight:600;width:100%;outline:none}
+.inp:focus{border-color:var(--accent)}
+.inp[readonly]{opacity:.6}
+.fl{display:flex;flex-direction:column;gap:3px;margin-bottom:10px}
+.fl label{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.fl small{font-size:10px;color:var(--muted);text-transform:none;letter-spacing:0}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.empty{text-align:center;color:var(--muted);padding:22px;font-size:13px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px}
+.card.due-now{border-color:rgba(239,68,68,.55);box-shadow:0 0 16px rgba(239,68,68,.12)}
+.card.due-soon{border-color:rgba(249,115,22,.5)}
+.ch{display:flex;justify-content:space-between;align-items:flex-start;padding:12px 14px;background:var(--panel);border-bottom:1px solid var(--border);gap:8px}
+.ci{display:flex;gap:10px;align-items:center}
+.cico{width:40px;height:40px;border-radius:10px;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.35);display:flex;align-items:center;justify-content:center;font-size:21px}
+.cr{font-family:'Teko',sans-serif;font-size:23px;font-weight:700;color:var(--accent);line-height:1}
+.cs{font-size:11px;color:var(--muted)}
+.cb{display:flex;gap:5px;flex-shrink:0}
+.kmb{padding:11px 14px;border-bottom:1px solid var(--border)}
+.kmr{display:flex;justify-content:space-between;align-items:baseline}
+.kmr small{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.kmv{font-family:'Teko',sans-serif;font-size:24px;font-weight:700}
+.pb{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin:6px 0 4px}
+.pb i{display:block;height:100%;border-radius:3px}
+.pl{display:flex;justify-content:space-between;font-size:10px;color:var(--muted)}
+.inf{padding:8px 14px;border-bottom:1px solid var(--border);font-size:12px;color:#a7f3d0;background:rgba(16,185,129,.05);display:flex;flex-direction:column;gap:2px}
+.inf .w{color:var(--gold)}
+.al{padding:11px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:10px}
+.al b{font-size:14px;display:block;margin-bottom:3px}
+.rs{font-size:12px;margin-top:2px}
+.rs.due-now{color:#fca5a5}.rs.due-soon{color:#fdba74}
+details{border-bottom:1px solid var(--border)}
+summary{padding:10px 14px;font-size:12px;font-weight:700;letter-spacing:.5px;color:var(--accent);cursor:pointer;list-style:none}
+summary::-webkit-details-marker{display:none}
+.tl{padding:0 14px 12px}
+.tg{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent);border-bottom:1px solid var(--border);margin:9px 0 5px;padding-bottom:3px}
+.tn2{font-size:11px;color:var(--gold);margin-bottom:6px}
+.tr{display:flex;justify-content:space-between;align-items:center;gap:8px;background:rgba(30,45,69,.35);border-radius:7px;padding:6px 10px;margin-bottom:3px}
+.tn{font-size:13px;font-weight:600}
+.tnote{font-size:10px;color:var(--gold);font-weight:500}
+.ttag{font-size:10px;color:#fdba74;font-weight:700;display:block}
+.act{font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0}
+.aI{background:rgba(59,130,246,.15);color:#60a5fa;border:1px solid rgba(59,130,246,.35)}
+.aR{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.35)}
+.aL{background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.35)}
+.upd{display:flex;flex-wrap:wrap;gap:7px;align-items:center;padding:9px 14px;border-bottom:1px solid var(--border)}
+.upd small{font-size:10px;letter-spacing:1px;color:var(--muted);white-space:nowrap}
+.upd .inp{max-width:130px;padding:6px 9px;font-size:13px}
+.nt{padding:9px 14px;background:rgba(16,185,129,.04)}
+.nt small{display:block;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:6px}
+.nr{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.nr .d{flex:1;min-width:120px;font-size:12px}
+.nr .d span{display:block;font-size:10px;color:var(--muted)}
+a.btn{text-decoration:none;display:inline-block}
+.wa{background:rgba(37,211,102,.15);color:#25d366;border:1px solid rgba(37,211,102,.35)}
+.ml{background:rgba(59,130,246,.12);color:#60a5fa;border:1px solid rgba(59,130,246,.35)}
+.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:100;align-items:flex-end;justify-content:center}
+.mo.open{display:flex}
+.md{background:var(--panel);border:1px solid var(--border);border-radius:18px 18px 0 0;padding:20px;width:100%;max-width:560px;max-height:92vh;overflow-y:auto}
+@media(min-width:600px){.mo{align-items:center}.md{border-radius:14px}}
+.mt{font-family:'Teko',sans-serif;font-size:23px;letter-spacing:1px;color:var(--accent)}
+.ms{font-size:11px;color:var(--muted);margin-bottom:12px}
+.ma{display:flex;gap:8px;margin-top:12px}
+.ma .btn{flex:1;padding:12px;font-size:14px}
+.tabs{display:flex;gap:6px;margin-bottom:10px}
+.tabs button{flex:1;padding:9px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-weight:700;font-size:12px}
+.tabs button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.chk{display:flex;gap:9px;align-items:flex-start;background:var(--card);border:1px solid var(--border);border-radius:7px;padding:8px 10px;margin-bottom:4px}
+.chk input{width:18px;height:18px;margin-top:2px;flex-shrink:0;accent-color:var(--green)}
+.chk .tn{flex:1}
+.brow{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:9px;padding:8px 12px;margin-bottom:6px}
+.brow .bi{flex:1}
+.brow b{font-family:'Teko',sans-serif;font-size:18px;color:var(--accent);letter-spacing:.5px}
+.brow small{display:block;font-size:11px;color:var(--muted)}
+.brow .inp{width:105px;padding:6px 8px;font-size:13px;text-align:center}
+.ht{width:100%;border-collapse:collapse;font-size:12px}
+.ht th{background:var(--panel);color:var(--muted);font-size:9px;letter-spacing:1px;text-transform:uppercase;text-align:left;padding:7px 10px;border-bottom:2px solid var(--border);white-space:nowrap}
+.ht td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+.wrap{overflow-x:auto}
+#toast{position:fixed;left:50%;bottom:78px;transform:translateX(-50%) translateY(80px);background:var(--green);color:#04130d;padding:10px 18px;border-radius:30px;font-weight:700;z-index:300;opacity:0;transition:all .3s;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.err{background:var(--danger);color:#fff}
+.foot{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+nav{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;background:#0a1628;border-top:2px solid var(--accent);padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;padding:13px 6px;background:transparent;border:none;color:var(--muted);font-weight:700;font-size:14px;letter-spacing:.5px}
+nav button.on{color:#fff;background:rgba(59,130,246,.2);box-shadow:inset 0 3px 0 var(--accent)}
+@media(max-width:600px){.sum{grid-template-columns:1fr 1fr}.srow{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><div class="logo-i">🚙</div><div><div class="logo-t">ARMADO TRACK</div><div class="logo-s">Mahindra Armado Service Tracker</div></div></div>
+  <div class="hb"><button class="btn btn-g" onclick="openBulk()">📍 Update All KM</button><button class="btn btn-p" onclick="openVeh()">＋ Add Vehicle</button></div>
+</header>
+<div class="bar">Alert 500 KM before due &nbsp;|&nbsp; Engine Oil + Filter: every 12 months (from last service / date entered service), alert 30 days before &nbsp;|&nbsp; I=Inspect R=Replace L=Lubricate</div>
+<main>
+<div id="viewDash">
+  <div id="banner"><div class="bn-h" onclick="toggleBn()"><div><span class="bn-t" id="bnT">SERVICE ALERT</span><span class="bn-c" id="bnC">0</span></div><span id="bnA">▼</span></div><div id="bnItems"></div></div>
+  <div class="sum" id="sum"></div>
+  <div class="box">
+    <div class="h2">🔍 Search Vehicle</div>
+    <div class="srow"><input class="inp" id="q" placeholder="Search by registration no. / unit / formation" oninput="doSearch()" autocomplete="off"><button class="btn btn-o" onclick="clearSearch()">✕</button></div>
+    <div id="sres" style="margin-top:12px"></div>
+  </div>
+  <details class="box" id="allBox"><summary class="h2" id="allT" style="padding:0;cursor:pointer;margin:0">📂 All vehicles</summary><div class="wrap" style="margin-top:10px"><table class="ht"><thead><tr><th>Regn</th><th>Unit</th><th>Formation</th><th>KM</th><th>Status</th><th>Edit / Remove</th></tr></thead><tbody id="allRows"></tbody></table></div></details>
+  <div id="dueBox" style="display:none"><div class="h2" id="dueT">🚨 Service Due / Overdue</div><div id="dueList"></div></div>
+  <div class="box">
+    <div class="h2">💾 Data</div>
+    <div class="ms">Data is stored on this phone/browser. To move it to another device, take a Backup here and Restore it there.</div>
+    <div class="foot"><button class="btn btn-g" onclick="backup()">⬇ Backup</button><button class="btn btn-o" onclick="document.getElementById('rf').click()">⬆ Restore</button><button class="btn btn-p" id="instBtn" style="display:none" onclick="doInstall()">📲 Install App</button><input type="file" id="rf" accept=".json,application/json" style="display:none" onchange="restore(event)"></div>
+  </div>
+</div>
+<div id="viewRec" style="display:none">
+  <div class="box">
+    <div class="h2">📋 SERVICE RECORD</div>
+    <input class="inp" id="rq" placeholder="Filter by registration no. / unit / formation" oninput="renderRec()">
+    <div class="ms" id="recCount" style="margin:8px 0 10px"></div>
+    <div class="wrap"><table class="ht"><thead><tr><th>Date</th><th>Regn</th><th>Type</th><th>KM</th><th>Details</th></tr></thead><tbody id="hist"></tbody></table></div>
+  </div>
+</div>
+</main>
+<nav><button id="tabDash" class="on" onclick="showTab('dash')">🏠 Dashboard</button><button id="tabRec" onclick="showTab('rec')">📋 Service Record</button></nav>
+
+<!-- ADD / EDIT VEHICLE -->
+<div class="mo" id="vehModal"><div class="md">
+  <div class="mt" id="vehT">➕ Add Armado</div><div class="ms">Mahindra Armado — enter vehicle details</div>
+  <div class="r2"><div class="fl"><label>Registration No. *</label><input class="inp" id="fRegn" style="text-transform:uppercase" placeholder="e.g. 12 A 345678"></div><div class="fl"><label>Vintage (Year) *</label><input class="inp" id="fVin" type="number" placeholder="e.g. 2019"></div></div>
+  <div class="r2"><div class="fl"><label>Unit</label><input class="inp" id="fUnit" placeholder="Unit"></div><div class="fl"><label>Formation</label><input class="inp" id="fForm" placeholder="Formation"></div></div>
+  <div class="r2"><div class="fl"><label>Current KM (Odometer) *</label><input class="inp" id="fKm" type="number" min="0" placeholder="e.g. 11400"></div><div class="fl"><label>Last Service KM</label><input class="inp" id="fLastKm" type="number" min="0" placeholder="e.g. 5000"></div></div>
+  <div class="fl"><small>If the service was done before the milestone (e.g. at 9,500 km for the 10,000 km service), enter the milestone (10,000) as Last Service KM.</small></div>
+  <div class="r2"><div class="fl"><label>Last Service Date</label><input class="inp" id="fLastDate" type="date"></div><div class="fl"><label>Date Entered Service</label><input class="inp" id="fInSvc" type="date"></div></div>
+  <div class="fl"><small>⏱ At least one date is required for the 1-year Engine Oil + Filter rule. The last service date is used if available; otherwise the date entered service is used.</small></div>
+  <div style="background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.2);border-radius:8px;padding:10px;margin-bottom:6px">
+    <div style="font-size:10px;letter-spacing:1px;color:var(--green);text-transform:uppercase;margin-bottom:8px">👤 Driver (for notifications, optional)</div>
+    <div class="fl"><label>Driver Name</label><input class="inp" id="fDn"></div>
+    <div class="r2"><div class="fl" style="margin:0"><label>WhatsApp No.</label><input class="inp" id="fDw" type="tel" placeholder="9876543210"></div><div class="fl" style="margin:0"><label>Email</label><input class="inp" id="fDe" type="email"></div></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px"><small style="font-size:10px;color:var(--muted)">To remove only one item, clear that box and press Save.</small><button class="btn btn-d btn-s" onclick="clearDriverForm()">🗑 Remove driver details</button></div>
+  </div>
+  <button class="btn btn-d" id="vehDel" style="display:none;width:100%;margin-top:10px;padding:11px" onclick="delVeh(editId)">🗑 Remove this vehicle</button>
+  <div class="ma"><button class="btn btn-p" onclick="saveVeh()">💾 Save</button><button class="btn btn-o" onclick="hide('vehModal')">Cancel</button></div>
+</div></div>
+
+<!-- SERVICE LOG -->
+<div class="mo" id="svcModal"><div class="md">
+  <div class="mt" id="svcT">Log Service</div><div class="ms" id="svcS"></div>
+  <div class="tabs"><button id="modeFull" onclick="setMode('full')">🔧 Full Service (KM)</button><button id="modeOil" onclick="setMode('oil')">🛢️ Engine Oil + Filter</button></div>
+  <div class="r2"><div class="fl"><label>Actual KM *</label><input class="inp" id="svcKm" type="number" min="0"></div><div class="fl"><label>Date *</label><input class="inp" id="svcDate" type="date"></div></div>
+  <div id="svcFull"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><div class="ms" style="margin:0">Tick the tasks that have been completed</div><button class="btn btn-o btn-s" onclick="toggleAll()">Select all / Clear</button></div><div class="tn2" id="svcNote"></div><div id="svcTasks"></div></div>
+  <div id="svcOil" style="display:none"><div class="ms">Only the Engine Oil + Filter were changed (both Replace)? This does not affect the KM-milestone service; it only restarts the 1-year timer.</div></div>
+  <div class="ma"><button class="btn btn-ok" onclick="saveSvc()">✅ Save</button><button class="btn btn-o" onclick="hide('svcModal')">Cancel</button></div>
+</div></div>
+
+<!-- BULK KM -->
+<div class="mo" id="bulkModal"><div class="md">
+  <div class="mt">📍 Update All KM</div><div class="ms">Update the current KM of all vehicles at once (fill in only the ones that changed)</div>
+  <input class="inp" id="bulkQ" placeholder="Filter by registration no. / unit / formation" oninput="filterBulk()" style="margin-bottom:10px">
+  <div id="bulkList"></div>
+  <div class="ma"><button class="btn btn-ok" onclick="saveBulk()">✅ Save All</button><button class="btn btn-o" onclick="hide('bulkModal')">Cancel</button></div>
+</div></div>
+
+<div id="toast"></div>
+
+<script>
+// ===LOGIC-START===
+const WARN_KM=500, WARN_DAYS=30, OIL_MONTHS=12;
+const rng=(a,b,s)=>{const r=[];for(let k=a;k<=b;k+=s)r.push(k);return r;};
+const ALL=rng(10000,100000,5000);            // 10000,15000,...,100000 (2000 & 4000 removed)
+const TEN=rng(10000,100000,10000);           // 10000,20000,...
+const ODD5=rng(15000,95000,10000);           // 15000,25000,...,95000
+const E15=rng(15000,90000,15000);            // 15000,30000,...,90000
+const E20=rng(20000,100000,20000);           // 20000,40000,...,100000
+const MS=ALL;
+function T(name,s){const m={};(s.I||[]).forEach(k=>m[k]='I');(s.L||[]).forEach(k=>m[k]='L');(s.R||[]).forEach(k=>m[k]='R');return{name,map:m,everyKm:s.everyKm||0,note:s.note||''};}
+// Source: Mahindra Defence Systems "Recommended Maintenance Schedule Chart" (manual pp. 27-29)
+const SCHEDULE=[
+ {cat:'Engine',tasks:[
+  T('Engine Oil',{I:ALL,R:E15}),
+  T('Engine Oil Filter',{I:ALL,R:E15}),
+  T('Fuel Pre-filter',{I:ALL,R:E20}),
+  T('Fuel Main Filter',{I:ALL,R:E20}),
+  T('Accessory Drive Belt & Tensioner',{I:ALL,R:[100000]}),
+  T('Coolant',{I:ALL,R:E20}),
+  T('Coolant Hoses and Pipes',{I:TEN,R:[50000,100000]}),
+  T('Vacuum Connections',{I:ALL}),
+  T('Pneumatic Connections',{I:ALL}),
+  T('Diagnostic Codes',{I:TEN})]},
+ {cat:'Air, Fuel and Exhaust',tasks:[
+  T('Air Filter Element (Pre & Main)',{I:ALL,R:E15}),
+  T('Water Sediments Drain (Fuel Filter)',{I:ALL}),
+  T('Fuel Hoses',{I:TEN,R:[50000,100000]}),
+  T('Air Hoses and Pipes',{I:TEN}),
+  T('AC Particle Filter',{I:TEN,R:E20}),
+  T('Air Drier Cartridge',{R:TEN})]},
+ {cat:'Transmission',tasks:[
+  T('Transmission Oil',{I:ALL,R:[50000,100000]}),
+  T('Transfer Case Oil',{I:ALL,R:[50000,100000]}),
+  T('Transmission Filter',{R:[50000,100000]})]},
+ {cat:'Axles, Wheels & Tyres',tasks:[
+  T('Differential Oil (Rear)',{I:ALL,R:[40000,80000]}),
+  T('Differential Oil (Front)',{I:ALL,R:[40000,80000]}),
+  T('Hub Oil - Front Axle',{I:ALL,R:[40000,80000]}),
+  T('Hub Oil - Rear Axle',{I:ALL,R:[40000,80000]}),
+  T('Prop-shaft U-Joints Grease',{L:TEN}),
+  T('Tyre Rotation',{I:TEN}),
+  T('Water Drainage of Compressed Air Chamber',{I:ODD5})]},
+ {cat:'Brakes',tasks:[
+  T('Brake Fluid Level',{I:ALL,R:E20}),
+  T('Brake Pads',{I:TEN,R:[40000,80000],note:'Manual note: Brake pad inspect & replace every 10,000 km'})]},
+ {cat:'Suspension & Steering',tasks:[
+  T('Suspension Ball Joints',{I:E20}),
+  T('Suspension Arms & Links',{I:E20}),
+  T('Power Steering Fluid Level',{I:ALL,R:[40000,80000]}),
+  T('Wheel Alignment',{everyKm:40000,note:'Inspect if abnormal conditions noticed, or every 40,000 km (whichever earlier)'})]},
+ {cat:'Electricals',tasks:[
+  T('All Lights, Horn, Wipers & Washers',{I:TEN}),
+  T('Battery Terminals',{I:ALL})]},
+ {cat:'Final Inspection',tasks:[
+  T('Tyre Pressure',{I:ALL}),
+  T('Under Chassis Nuts & Bolts (Tightness)',{I:ODD5}),
+  T('Exhaust Pipe Mountings & Damage / Leakage',{I:ODD5}),
+  T('Road Test',{I:ALL})]}
+];
+const RANK={I:1,L:2,R:3};
+function taskAction(t,absKm){
+  const cyc=((absKm-1)%100000)+1;          // chart repeats every 100000 km
+  let a=t.map[cyc]||'';
+  if(!a&&t.everyKm&&absKm%t.everyKm===0)a='I';
+  return a;
+}
+function nextMilestoneAfter(km){
+  const base=Math.floor(km/100000)*100000;
+  for(const m of MS){if(base+m>km)return base+m;}
+  return base+100000+MS[0];
+}
+function lastMilestoneAtOrBelow(km){
+  const base=Math.floor(km/100000)*100000;
+  for(let i=MS.length-1;i>=0;i--){if(base+MS[i]<=km)return base+MS[i];}
+  return base;
+}
+function msInRange(lo,hi){const out=[];let m=nextMilestoneAfter(lo);while(m<=hi){out.push(m);m=nextMilestoneAfter(m);}return out;}
+function pISO(s){const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s||'');return m?{y:+m[1],m:+m[2],d:+m[3]}:null;}
+function dayNum(s){const p=pISO(s);return p?Math.round(Date.UTC(p.y,p.m-1,p.d)/86400000):null;}
+const z2=n=>String(n).padStart(2,'0');
+function todayISO(d){d=d||new Date();return d.getFullYear()+'-'+z2(d.getMonth()+1)+'-'+z2(d.getDate());}
+function addMonthsISO(s,n){const p=pISO(s);if(!p)return null;let mo=p.m-1+n;const y=p.y+Math.floor(mo/12);mo=((mo%12)+12)%12;const dim=new Date(Date.UTC(y,mo+1,0)).getUTCDate();return y+'-'+z2(mo+1)+'-'+z2(Math.min(p.d,dim));}
+function fmtD(s){const p=pISO(s);return p?z2(p.d)+'/'+z2(p.m)+'/'+p.y:'—';}
+function oilTime(v,today){
+  const ds=[v.lastSvcDate,v.lastOilDate].filter(x=>pISO(x)).sort();
+  let ref=null,src='';
+  if(ds.length){ref=ds[ds.length-1];src=(ref===v.lastOilDate)?'last Engine Oil + Filter change':'last service';}
+  else if(pISO(v.inServiceDate)){ref=v.inServiceDate;src='date entered service';}
+  if(!ref)return{status:'nodate'};
+  const due=addMonthsISO(ref,OIL_MONTHS),left=dayNum(due)-dayNum(today);
+  return{status:left<=0?'due-now':left<=WARN_DAYS?'due-soon':'ok',due,left,ref,src};
+}
+function collectTasks(ms,oilDue){
+  const groups=[];
+  SCHEDULE.forEach(g=>{
+    const items=[];
+    g.tasks.forEach(t=>{
+      let a='';
+      ms.forEach(m=>{const x=taskAction(t,m);if(x&&(RANK[x]>(RANK[a]||0)))a=x;});
+      let timeOv=false;
+      if((t.name==='Engine Oil'||t.name==='Engine Oil Filter')&&oilDue){if(a!=='R')timeOv=true;a='R';}
+      if(a)items.push({name:t.name,action:a,note:t.note,timeOv});
+    });
+    if(items.length)groups.push({cat:g.cat,items});
+  });
+  return groups;
+}
+function vehInfo(v,today){
+  const cur=+v.currentKm||0,last=Math.max(+v.lastSvcKm||0,+v.lastMs||0);
+  const nxt=nextMilestoneAfter(last),kmLeft=nxt-cur;
+  const kmStatus=kmLeft<=0?'due-now':kmLeft<=WARN_KM?'due-soon':'ok';
+  const target=cur>=nxt?lastMilestoneAtOrBelow(cur):nxt;
+  const ms=msInRange(last,target);
+  const oil=oilTime(v,today);
+  const P={'ok':0,'nodate':0,'due-soon':1,'due-now':2};
+  const status=P[kmStatus]>=P[oil.status]?kmStatus:oil.status;
+  const reasons=[];
+  if(kmStatus!=='ok')reasons.push({kind:'KM',lv:kmStatus,text:'Service @ '+nxt.toLocaleString('en-IN')+' KM — '+(kmLeft<0?(-kmLeft).toLocaleString('en-IN')+' KM overdue':kmLeft===0?'due now':kmLeft.toLocaleString('en-IN')+' KM remaining')});
+  if(oil.status==='due-now')reasons.push({kind:'TIME',lv:'due-now',text:'Engine Oil + Filter change due — 1 year completed (due '+fmtD(oil.due)+(oil.left<0?', '+(-oil.left)+' days overdue':'')+')'});
+  if(oil.status==='due-soon')reasons.push({kind:'TIME',lv:'due-soon',text:'Engine Oil + Filter — 1 year completes in '+oil.left+' day'+(oil.left===1?'':'s')+' ('+fmtD(oil.due)+')'});
+  const groups=collectTasks(ms,oil.status==='due-now');
+  return{cur,last,nxt,kmLeft,kmStatus,target,ms,oil,status,reasons,groups};
+}
+// ===LOGIC-END===
+
+// ---------- app ----------
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>(Number(n)||0).toLocaleString('en-IN');
+const norm=s=>String(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+const KEY='armadoTrack_v1';
+let state=(function(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&Array.isArray(s.vehicles))return{vehicles:s.vehicles,history:Array.isArray(s.history)?s.history:[]};}catch(e){}return{vehicles:[],history:[]};})();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){toast('Could not save data (storage blocked or full)',true);}}
+const get=id=>state.vehicles.find(v=>v.id===id);
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+function migrateLegacy(){
+  const R=[[' — 1 saal ka timer dobara shuru',' — 1-year timer restarted'],['(koi task tick nahi)','(no tasks ticked)']];
+  state.history.forEach(e=>{
+    R.forEach(r=>{if(e.details&&e.details.indexOf(r[0])>-1)e.details=e.details.split(r[0]).join(r[1]);});
+    if(e.type==='Engine Oil only')e.type='Engine Oil + Filter';
+  });
+}
+migrateLegacy();
+function show(id){$(id).classList.add('open');}
+function hide(id){$(id).classList.remove('open');}
+let tt;function toast(m,err){const t=$('toast');t.textContent=m;t.className=(err?'err ':'')+'show';clearTimeout(tt);tt=setTimeout(()=>t.className='',3600);}
+const ACT={I:'🔍 INSPECT',R:'🔄 REPLACE',L:'🛢️ LUBRICATE'};
+const COL={'due-now':'var(--danger)','due-soon':'var(--warn)','ok':'var(--green)'};
+
+function cardHTML(v){
+  const I=vehInfo(v,todayISO()),col=COL[I.status];
+  const pct=Math.max(0,Math.min(100,((I.cur-I.last)/(I.nxt-I.last))*100));
+  const title=I.status==='due-now'?'🔴 SERVICE DUE / OVERDUE':I.status==='due-soon'?'🟠 SERVICE DUE SOON':'🟢 Next service @ '+fmt(I.nxt)+' KM';
+  let reasons=I.reasons.map(r=>'<div class="rs '+r.lv+'">'+(r.kind==='KM'?'📍 ':'⏱️ ')+esc(r.text)+'</div>').join('');
+  if(!reasons)reasons='<div class="rs" style="color:#94a3b8">'+fmt(I.kmLeft)+' KM remaining'+(I.oil.status==='ok'?' • Engine Oil + Filter time limit: '+fmtD(I.oil.due):'')+'</div>';
+  let inf='<div>🔧 Last service: '+(v.lastSvcDate?fmtD(v.lastSvcDate):'—')+' @ '+fmt(v.lastSvcKm)+' KM</div>';
+  if(v.inServiceDate)inf+='<div>🚙 In service since: '+fmtD(v.inServiceDate)+'</div>';
+  if(v.lastOilDate)inf+='<div>🛢️ Last Engine Oil + Filter change: '+fmtD(v.lastOilDate)+'</div>';
+  if(I.oil.status==='nodate')inf+='<div class="w">⚠️ No date on record — the 1-year Engine Oil + Filter time check is off. Edit the vehicle and enter a date.</div>';
+  else inf+='<div>⏱️ Engine Oil + Filter time limit: '+fmtD(I.oil.due)+' ('+(I.oil.left<=0?(-I.oil.left)+' days overdue':I.oil.left+' days left')+') — based on '+esc(I.oil.src)+'</div>';
+  const skip=I.ms.length>1?'<div class="tn2">⚠️ '+I.ms.length+' milestones were skipped ('+fmt(I.ms[0])+' – '+fmt(I.ms[I.ms.length-1])+' KM) — Replace/Lube items from the skipped milestones are included.</div>':'';
+  let n=0;const tasks=I.groups.map(g=>{n+=g.items.length;return'<div class="tg">'+esc(g.cat)+'</div>'+g.items.map(t=>'<div class="tr"><div class="tn">'+esc(t.name)+(t.note?'<div class="tnote">'+esc(t.note)+'</div>':'')+(t.timeOv?'<span class="ttag">⏱ 1 year completed — replace oil + filter</span>':'')+'</div><span class="act a'+t.action+'">'+ACT[t.action]+'</span></div>').join('');}).join('');
+  const lbl=I.kmStatus==='ok'?'Next service @ '+fmt(I.nxt)+' KM — preview ('+n+' tasks)':'Tasks due @ '+fmt(I.target)+' KM — '+n+' tasks';
+  const nt=(I.status!=='ok'||v.driverName||v.driverWA||v.driverEmail)?notifyHTML(v,I):'';
+  return'<div class="card '+I.status+'"><div class="ch"><div class="ci"><div class="cico">🚙</div><div><div class="cr">'+esc(v.regn)+'</div><div class="cs">Mahindra Armado • Vintage '+esc(v.vintage)+'</div>'+((v.unit||v.formation)?'<div class="cs">'+(v.unit?'Unit: '+esc(v.unit):'')+(v.unit&&v.formation?' • ':'')+(v.formation?'Formation: '+esc(v.formation):'')+'</div>':'')+'</div></div><div class="cb"><button class="btn btn-o btn-s" onclick="openVeh(\''+v.id+'\')">✏️ Edit</button><button class="btn btn-d btn-s" onclick="delVeh(\''+v.id+'\')">🗑 Remove</button></div></div>'
+  +'<div class="kmb"><div class="kmr"><small>Current KM</small><span class="kmv" style="color:'+col+'">'+fmt(I.cur)+' KM</span></div><div class="pb"><i style="width:'+pct+'%;background:linear-gradient(90deg,var(--green),'+col+')"></i></div><div class="pl"><span>Last: '+fmt(I.last)+' KM</span><span>Next: '+fmt(I.nxt)+' KM</span></div></div>'
+  +'<div class="inf">'+inf+'</div>'
+  +'<div class="al" style="background:'+(I.status==='ok'?'rgba(16,185,129,.06)':I.status==='due-now'?'rgba(239,68,68,.1)':'rgba(249,115,22,.1)')+'"><div><b style="color:'+col+'">'+title+'</b>'+reasons+'</div><button class="btn btn-g" onclick="openSvc(\''+v.id+'\')">LOG SERVICE</button></div>'
+  +'<details'+(I.kmStatus!=='ok'?' open':'')+'><summary>▼ '+esc(lbl)+'</summary><div class="tl">'+skip+tasks+'</div></details>'
+  +'<div class="upd"><small>UPDATE KM →</small><input class="inp" type="number" min="0" placeholder="Odometer KM"><button class="btn btn-p btn-s" onclick="updKm(\''+v.id+'\',this)">UPDATE</button><button class="btn btn-o btn-s" onclick="openRecord(\''+v.id+'\')">📋 Service record</button></div>'+nt+'</div>';
+}
+function msgText(v,I){
+  const l=I.reasons.map(r=>'• '+r.text);
+  return'🚙 SERVICE ALERT — ARMADO TRACK\n\nVehicle: '+v.regn+' (Mahindra Armado)\n'+(v.unit?'Unit: '+v.unit+'\n':'')+(v.formation?'Formation: '+v.formation+'\n':'')+'Current KM: '+fmt(I.cur)+'\n\n'+(l.length?l.join('\n'):'• Service reminder')+'\n\nPlease report to the workshop with your vehicle.\n— Workshop Manager';
+}
+function notifyHTML(v,I){
+  const m=msgText(v,I);let wa='';
+  let num=String(v.driverWA||'').replace(/\D/g,'');if(num.length===10)num='91'+num;
+  if(num)wa='<a class="btn btn-s wa" target="_blank" rel="noopener" href="https://wa.me/'+num+'?text='+encodeURIComponent(m)+'">💬 WhatsApp</a>';
+  const rm=(v.driverName||v.driverWA||v.driverEmail)?'<button class="btn btn-d btn-s" onclick="clearDriver(\''+v.id+'\')">🗑 Remove driver</button>':'';
+  const em=v.driverEmail?'<a class="btn btn-s ml" href="mailto:'+esc(v.driverEmail)+'?subject='+encodeURIComponent('Service Alert — '+v.regn)+'&body='+encodeURIComponent(m)+'">✉️ Email</a>':'';
+  return'<div class="nt"><small>📣 Notify driver</small><div class="nr"><div class="d">'+(v.driverName?esc(v.driverName):'No driver added')+'<span>'+(v.driverWA?'📱 '+esc(v.driverWA):'')+' '+(v.driverEmail?'✉️ '+esc(v.driverEmail):'')+'</span></div>'+wa+em+rm+'</div></div>';
+}
+
+function renderAll(){
+  const today=todayISO();const infos=state.vehicles.map(v=>({v,I:vehInfo(v,today)}));
+  let ok=0,soon=0,due=0;infos.forEach(x=>{if(x.I.status==='due-now')due++;else if(x.I.status==='due-soon')soon++;else ok++;});
+  $('sum').innerHTML='<div class="sc"><small>Total Armado</small><span>'+state.vehicles.length+'</span></div><div class="sc g"><small>Running Fine</small><span>'+ok+'</span></div><div class="sc w"><small>Service Soon</small><span>'+soon+'</span></div><div class="sc r"><small>Due Now</small><span>'+due+'</span></div>';
+  const al=infos.filter(x=>x.I.status!=='ok').sort((a,b)=>(a.I.status==='due-now'?0:1)-(b.I.status==='due-now'?0:1));
+  const bn=$('banner');
+  if(!al.length){bn.style.display='none';$('dueBox').style.display='none';}
+  else{
+    const hard=al.some(x=>x.I.status==='due-now');
+    bn.style.display='block';bn.className=hard?'':'warn';
+    $('bnT').textContent=hard?'⚠️ SERVICE OVERDUE / DUE':'🔔 SERVICE DUE SOON';$('bnC').textContent=al.length;
+    $('bnItems').innerHTML=al.map(x=>'<div class="bn-i" onclick="goVeh(\''+x.v.id+'\')"><b>'+esc(x.v.regn)+'</b>'+x.I.reasons.map(r=>'<div>'+(r.kind==='KM'?'📍 ':'⏱️ ')+esc(r.text)+'</div>').join('')+'</div>').join('');
+    $('dueBox').style.display='block';$('dueT').innerHTML='🚨 Service Due / Overdue <span class="bn-c" style="font-family:Rajdhani">'+al.length+'</span>';
+    $('dueList').innerHTML=al.map(x=>cardHTML(x.v)).join('');
+  }
+  renderAllList(infos);renderRec();doSearch(true);
+}
+function renderAllList(infos){
+  $('allT').textContent='📂 All vehicles ('+infos.length+') — Edit / Remove from here';
+  const L={'due-now':'🔴 Due','due-soon':'🟠 Soon','ok':'🟢 OK'};
+  const rows=infos.slice().sort((a,b)=>a.v.regn.localeCompare(b.v.regn)).map(x=>'<tr><td><a href="#" style="color:var(--accent);text-decoration:none" onclick="goVeh(\''+x.v.id+'\');return false"><b>'+esc(x.v.regn)+'</b></a></td><td>'+esc(x.v.unit||'—')+'</td><td>'+esc(x.v.formation||'—')+'</td><td class="mono">'+fmt(x.v.currentKm)+'</td><td>'+L[x.I.status]+'</td><td style="white-space:nowrap"><button class="btn btn-o btn-s" onclick="openVeh(\''+x.v.id+'\')">✏️ Edit</button> <button class="btn btn-d btn-s" onclick="delVeh(\''+x.v.id+'\')">🗑 Remove</button></td></tr>');
+  $('allRows').innerHTML=rows.length?rows.join(''):'<tr><td colspan="6" class="empty">No vehicles added yet</td></tr>';
+}
+function renderRec(){
+  const q=norm($('rq').value);
+  const all=state.history.filter(e=>{if(!q)return true;const v=state.vehicles.find(x=>x.regn===e.regn)||{};return[e.regn,v.unit,v.formation].some(x=>norm(x).includes(q));});
+  const h=all.slice(0,300);
+  $('recCount').textContent=all.length+' record'+(all.length===1?'':'s')+(all.length>300?' (showing latest 300 — use the filter)':'')+(q?' • filter applied':'');
+  $('hist').innerHTML=h.length?h.map(e=>'<tr><td class="mono">'+fmtD(e.date)+'</td><td><b style="color:var(--accent)">'+esc(e.regn)+'</b></td><td>'+esc(e.type)+'</td><td class="mono">'+fmt(e.km)+'</td><td style="min-width:180px;color:#cbd5e1">'+esc(e.details)+'</td></tr>').join(''):'<tr><td colspan="5" class="empty">'+(state.history.length?'No records match this filter':'No service has been logged yet')+'</td></tr>';
+}
+function showTab(t){
+  const rec=t==='rec';
+  $('viewDash').style.display=rec?'none':'block';$('viewRec').style.display=rec?'block':'none';
+  $('tabDash').classList.toggle('on',!rec);$('tabRec').classList.toggle('on',rec);
+  if(rec)renderRec();window.scrollTo(0,0);
+}
+function openRecord(id){const v=get(id);if(!v)return;$('rq').value=v.regn;showTab('rec');}
+function toggleBn(){const o=$('bnItems').classList.toggle('open');$('bnA').textContent=o?'▲':'▼';}
+function goVeh(id){const v=get(id);if(!v)return;showTab('dash');$('q').value=v.regn;doSearch();$('q').scrollIntoView({behavior:'smooth',block:'start'});}
+function doSearch(keep){
+  const q=norm($('q').value),r=$('sres');
+  if(!q){r.innerHTML='';return;}
+  const f=state.vehicles.filter(v=>[v.regn,v.unit,v.formation].some(x=>norm(x).includes(q)));
+  if(!f.length){r.innerHTML='<div class="empty">🔍 No vehicle found for "'+esc($('q').value)+'"</div>';return;}
+  r.innerHTML=f.slice(0,6).map(cardHTML).join('')+(f.length>6?'<div class="empty">'+(f.length-6)+' more vehicle(s) — type more characters to narrow the search</div>':'');
+}
+function clearSearch(){$('q').value='';$('sres').innerHTML='';}
+
+// ----- add / edit -----
+let editId=null;
+function clearDriverForm(){['fDn','fDw','fDe'].forEach(k=>{$(k).value='';});toast('Driver details cleared — press Save');}
+function clearDriver(id){const v=get(id);if(!v)return;if(!confirm('Remove the driver details (name, mobile, email) for '+v.regn+'?'))return;v.driverName='';v.driverWA='';v.driverEmail='';save();renderAll();toast('🗑️ Driver details removed');}
+function openVeh(id){
+  editId=id||null;const v=id?get(id):{};
+  $('vehT').textContent=id?'✏️ Edit Armado':'➕ Add Armado';
+  const set=(k,x)=>{$(k).value=x==null?'':x;};
+  set('fRegn',v.regn);set('fVin',v.vintage);set('fUnit',v.unit);set('fForm',v.formation);set('fKm',v.currentKm);set('fLastKm',id?v.lastSvcKm:'');set('fLastDate',v.lastSvcDate);set('fInSvc',v.inServiceDate);set('fDn',v.driverName);set('fDw',v.driverWA);set('fDe',v.driverEmail);
+  $('fRegn').readOnly=false;$('vehDel').style.display=id?'block':'none';show('vehModal');
+}
+function saveVeh(){
+  const today=todayISO();
+  const regn=$('fRegn').value.trim().toUpperCase().replace(/\s+/g,' ');
+  const vin=parseInt($('fVin').value),km=parseInt($('fKm').value),lastKm=$('fLastKm').value===''?0:parseInt($('fLastKm').value);
+  const ld=$('fLastDate').value,id2=$('fInSvc').value;
+  if(!regn)return toast('Enter the registration number',true);
+  if(isNaN(vin)||vin<1980||vin>2100)return toast('Enter a valid vintage year',true);
+  if(isNaN(km)||km<0)return toast('Enter the current KM',true);
+  if(isNaN(lastKm)||lastKm<0)return toast('Enter a valid Last Service KM',true);
+  if(lastKm>km)return toast('Last Service KM cannot be greater than the current KM',true);
+  if(!pISO(ld)&&!pISO(id2))return toast('Enter either the last service date or the date entered service',true);
+  if((ld&&ld>today)||(id2&&id2>today))return toast('Future dates are not allowed',true);
+  if(state.vehicles.some(v=>v.id!==editId&&norm(v.regn)===norm(regn)))return toast('This registration number already exists',true);
+  const f={vintage:vin,unit:$('fUnit').value.trim(),formation:$('fForm').value.trim(),currentKm:km,lastSvcKm:lastKm,lastSvcDate:ld||'',inServiceDate:id2||'',driverName:$('fDn').value.trim(),driverWA:$('fDw').value.trim(),driverEmail:$('fDe').value.trim()};
+  if(editId){const v=get(editId);if(f.lastSvcKm!==v.lastSvcKm)v.lastMs=0;if(v.regn!==regn)state.history.forEach(h=>{if(h.regn===v.regn)h.regn=regn;});v.regn=regn;Object.assign(v,f);}
+  else state.vehicles.push(Object.assign({id:uid(),regn:regn,lastOilDate:'',lastMs:0},f));
+  save();hide('vehModal');renderAll();toast(editId?'✅ Vehicle updated':'✅ '+regn+' added');
+}
+function delVeh(id){const v=get(id);if(!v)return;if(!confirm('Remove '+v.regn+'? This cannot be undone.'))return;state.vehicles=state.vehicles.filter(x=>x.id!==id);save();hide('vehModal');renderAll();toast('🗑️ '+v.regn+' removed');}
+function updKm(id,btn){
+  const i=btn.parentNode.querySelector('input'),val=parseInt(i.value),v=get(id);
+  if(isNaN(val)||val<0)return toast('Enter a valid KM',true);
+  if(val<v.currentKm)return toast('New KM is lower than the current KM ('+fmt(v.currentKm)+'). Use Edit to correct a mistake.',true);
+  v.currentKm=val;save();renderAll();toast('✅ '+v.regn+' → '+fmt(val)+' KM');
+}
+
+// ----- bulk km -----
+function openBulk(){
+  const list=state.vehicles.slice().sort((a,b)=>a.regn.localeCompare(b.regn));
+  $('bulkQ').value='';
+  $('bulkList').innerHTML=list.length?list.map(v=>'<div class="brow" data-n="'+[v.regn,v.unit,v.formation].map(norm).join('|')+'"><div class="bi"><b>'+esc(v.regn)+'</b><small>Current: '+fmt(v.currentKm)+' KM'+((v.unit||v.formation)?' • '+esc([v.unit,v.formation].filter(Boolean).join(' / ')):'')+'</small></div><input class="inp" type="number" min="0" data-id="'+v.id+'" placeholder="New KM"></div>').join(''):'<div class="empty">Add a vehicle first</div>';
+  show('bulkModal');
+}
+function filterBulk(){const q=norm($('bulkQ').value);document.querySelectorAll('#bulkList .brow').forEach(r=>{r.style.display=(!q||r.dataset.n.indexOf(q)>-1)?'flex':'none';});}
+function saveBulk(){
+  let n=0,low=[];
+  document.querySelectorAll('#bulkList input').forEach(i=>{
+    if(!i.value.trim())return;const v=get(i.dataset.id),val=parseInt(i.value);if(!v||isNaN(val))return;
+    if(val<v.currentKm){low.push(v.regn);return;}
+    v.currentKm=val;n++;
+  });
+  if(!n&&!low.length)return toast('No KM entered',true);
+  save();renderAll();
+  if(low.length){toast('✅ '+n+' updated. Skipped (lower KM): '+low.join(', '),true);if(n===0)return;}
+  else toast('✅ KM updated for '+n+' vehicle(s)');
+  hide('bulkModal');
+}
+
+// ----- service log -----
+let svc={id:null,mode:'full',list:[]};
+function openSvc(id){
+  const v=get(id),I=vehInfo(v,todayISO());
+  svc={id,mode:(I.kmStatus==='ok'&&I.oil.status==='due-now')?'oil':'full',list:[]};
+  $('svcT').textContent='Log Service — '+v.regn;
+  $('svcS').textContent='Current: '+fmt(I.cur)+' KM • Next milestone: '+fmt(I.nxt)+' KM';
+  $('svcKm').value=v.currentKm;$('svcDate').value=todayISO();
+  setMode(svc.mode);show('svcModal');
+}
+function setMode(m){
+  svc.mode=m;$('modeFull').classList.toggle('on',m==='full');$('modeOil').classList.toggle('on',m==='oil');
+  $('svcFull').style.display=m==='full'?'block':'none';$('svcOil').style.display=m==='oil'?'block':'none';
+  if(m==='full')buildSvcTasks();
+}
+function buildSvcTasks(){
+  const v=get(svc.id),I=vehInfo(v,todayISO());svc.list=[];let h='';
+  I.groups.forEach(g=>{h+='<div class="tg">'+esc(g.cat)+'</div>';g.items.forEach(t=>{svc.list.push(t);h+='<label class="chk"><input type="checkbox" data-i="'+(svc.list.length-1)+'"><div class="tn">'+esc(t.name)+(t.timeOv?'<span class="ttag">⏱ 1 year completed</span>':'')+'</div><span class="act a'+t.action+'">'+ACT[t.action]+'</span></label>';});});
+  $('svcTasks').innerHTML=h;
+  $('svcNote').textContent=I.ms.length>1?'⚠️ '+I.ms.length+' milestones were skipped — Replace/Lube items from them are included in this list.':(I.kmStatus==='ok'?'KM service is not due yet (preview). Log it only if you are servicing early.':'');
+}
+function toggleAll(){const b=[...document.querySelectorAll('#svcTasks input')];const all=b.every(x=>x.checked);b.forEach(x=>x.checked=!all);}
+function saveSvc(){
+  const v=get(svc.id),today=todayISO(),km=parseInt($('svcKm').value),date=$('svcDate').value;
+  if(isNaN(km)||km<0)return toast('Enter a valid KM',true);
+  if(!pISO(date))return toast('Select a date',true);
+  if(date>today)return toast('Future dates are not allowed',true);
+  if(svc.mode==='oil'){
+    v.lastOilDate=date;v.currentKm=Math.max(v.currentKm,km);
+    state.history.unshift({date,regn:v.regn,type:'Engine Oil + Filter',km,details:'Engine Oil + Filter change [R] (time-based) — 1-year timer restarted'});
+  }else{
+    const boxes=[...document.querySelectorAll('#svcTasks input')],done=boxes.filter(b=>b.checked).map(b=>svc.list[+b.dataset.i]);
+    const miss=boxes.length-done.length;
+    if(miss>0&&!confirm(miss+' task(s) not ticked. Mark the service as complete anyway?'))return;
+    const base=Math.max(+v.lastSvcKm||0,+v.lastMs||0),nxt=nextMilestoneAfter(base);
+    v.lastMs=km>=nxt?lastMilestoneAtOrBelow(km):nxt;
+    v.lastSvcKm=km;v.lastSvcDate=date;v.currentKm=Math.max(v.currentKm,km);
+    if(done.some(t=>t.name==='Engine Oil'&&t.action==='R'))v.lastOilDate=date;
+    state.history.unshift({date,regn:v.regn,type:'Full service ('+fmt(v.lastMs)+' KM)',km,details:done.length?done.map(t=>t.name+' ['+t.action+']').join(', '):'(no tasks ticked)'});
+  }
+  save();hide('svcModal');renderAll();toast('✅ Service logged — '+v.regn);
+}
+
+// ----- backup / restore -----
+function backup(){
+  const b=new Blob([JSON.stringify({app:'armado-track',saved:new Date().toISOString(),vehicles:state.vehicles,history:state.history},null,1)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='armado-backup-'+todayISO()+'.json';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);toast('⬇ Backup file downloaded');
+}
+function restore(ev){
+  const f=ev.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{const d=JSON.parse(r.result);if(!d||!Array.isArray(d.vehicles))throw 0;
+    if(!confirm('Data for '+d.vehicles.length+' vehicle(s) will be restored and the current data will be replaced. Continue?'))return;
+    state={vehicles:d.vehicles,history:Array.isArray(d.history)?d.history:[]};save();renderAll();toast('✅ Data restored');
+  }catch(e){toast('This is not a valid backup file',true);}ev.target.value='';};
+  r.readAsText(f);
+}
+
+// ----- PWA -----
+let dip=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dip=e;$('instBtn').style.display='inline-block';});
+function doInstall(){if(!dip)return;dip.prompt();dip.userChoice.then(()=>{dip=null;$('instBtn').style.display='none';});}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});});}
+renderAll();
+</script>
+</body>
+</html>
