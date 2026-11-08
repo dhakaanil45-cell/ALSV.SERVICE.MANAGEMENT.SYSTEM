@@ -203,6 +203,24 @@ nav button.on{color:#fff;background:rgba(59,130,246,.2);box-shadow:inset 0 3px 0
   <div class="r2"><div class="fl"><label>Actual KM *</label><input class="inp" id="svcKm" type="number" min="0"></div><div class="fl"><label>Date *</label><input class="inp" id="svcDate" type="date"></div></div>
   <div id="svcFull"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><div class="ms" style="margin:0">Tick the tasks that have been completed</div><button class="btn btn-o btn-s" onclick="toggleAll()">Select all / Clear</button></div><div class="tn2" id="svcNote"></div><div id="svcTasks"></div></div>
   <div id="svcOil" style="display:none"><div class="ms">Only the Engine Oil + Filter were changed (both Replace)? This does not affect the KM-milestone service; it only restarts the 1-year timer.</div></div>
+  
+  <!-- LOG BREAKDOWN SERVICE BUTTON -->
+  <button onclick="toggleBreakdownForm()" style="background: #ef4444; color: #fff; border: none; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 14px; width: 100%;">
+      LOG BREAKDOWN SERVICE
+  </button>
+
+  <!-- Breakdown Form (Hidden by default) -->
+  <div id="breakdownSection" style="display: none; background: var(--panel); padding: 14px; border-radius: 10px; margin-top: 10px; border: 1px solid #ef4444;">
+      <h4 style="color: #ef4444; margin-bottom: 8px; font-family: 'Teko', sans-serif; font-size: 18px;">Breakdown & Repair Entry</h4>
+      <form id="breakdownLogForm" onsubmit="saveBreakdown(event)" style="display: flex; flex-direction: column; gap: 8px;">
+          <input type="date" id="bDate" required style="padding: 6px; border-radius: 6px; background: var(--bg); color: var(--text); border: 1px solid var(--border);">
+          <input type="number" id="bKm" placeholder="Current Kilometers (KM)" required style="padding: 6px; border-radius: 6px; background: var(--bg); color: var(--text); border: 1px solid var(--border);">
+          <textarea id="bFault" placeholder="Fault / Breakdown Reason (e.g., Cam roller failure)" rows="2" required style="padding: 6px; border-radius: 6px; background: var(--bg); color: var(--text); border: 1px solid var(--border);"></textarea>
+          <textarea id="bRepairActivity" placeholder="Spares Used / Repair Activity" rows="2" required style="padding: 6px; border-radius: 6px; background: var(--bg); color: var(--text); border: 1px solid var(--border);"></textarea>
+          <button type="submit" style="background: #3b82f6; color: #fff; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer;">Save Breakdown Record</button>
+      </form>
+  </div>
+
   <div class="ma"><button class="btn btn-ok" onclick="saveSvc()">✅ Save</button><button class="btn btn-o" onclick="hide('svcModal')">Cancel</button></div>
 </div></div>
 
@@ -516,6 +534,7 @@ function openSvc(id){
   $('svcT').textContent='Log Service — '+v.regn;
   $('svcS').textContent='Current: '+fmt(I.cur)+' KM • Next milestone: '+fmt(I.nxt)+' KM';
   $('svcKm').value=v.currentKm;$('svcDate').value=todayISO();
+  $('breakdownSection').style.display='none';
   setMode(svc.mode);show('svcModal');
 }
 function setMode(m){
@@ -549,6 +568,51 @@ function saveSvc(){
     state.history.unshift({date,regn:v.regn,type:'Full service ('+fmt(v.lastMs)+' KM)',km,details:done.length?done.map(t=>t.name+' ['+t.action+']').join(', '):'(no tasks ticked)'});
   }
   save();hide('svcModal');renderAll();toast('✅ Service logged — '+v.regn);
+}
+
+// ----- breakdown service log -----
+function toggleBreakdownForm(){
+  const sec = $('breakdownSection');
+  sec.style.display = sec.style.display === 'none' ? 'block' : 'none';
+  if(sec.style.display === 'block'){
+    $('bDate').value = todayISO();
+    $('bKm').value = $('svcKm').value || '';
+  }
+}
+
+function saveBreakdown(e){
+  e.preventDefault();
+  const v = get(svc.id);
+  if(!v) return;
+  const date = $('bDate').value;
+  const km = parseInt($('bKm').value);
+  const fault = $('bFault').value.trim();
+  const repairActivity = $('bRepairActivity').value.trim();
+  const today = todayISO();
+
+  if(isNaN(km) || km < 0) return toast('Enter a valid KM', true);
+  if(!pISO(date)) return toast('Select a date', true);
+  if(date > today) return toast('Future dates are not allowed', true);
+  if(!fault) return toast('Enter fault/breakdown reason', true);
+  if(!repairActivity) return toast('Enter spares used or repair activity', true);
+
+  v.currentKm = Math.max(v.currentKm, km);
+
+  const detailsText = 'Fault: ' + fault + ' | Spares Used / Repair Activity: ' + repairActivity;
+  state.history.unshift({
+    date: date,
+    regn: v.regn,
+    type: 'Breakdown Repair',
+    km: km,
+    details: detailsText
+  });
+
+  save();
+  hide('svcModal');
+  renderAll();
+  toast('✅ Breakdown repair record successfully added to Service History!');
+  document.getElementById('breakdownLogForm').reset();
+  $('breakdownSection').style.display = 'none';
 }
 
 // ----- backup / restore -----
