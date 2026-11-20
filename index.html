@@ -101,7 +101,7 @@ summary::-webkit-details-marker{display:none}
 .aL{background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.35)}
 .upd{display:flex;flex-wrap:wrap;gap:7px;align-items:center;padding:9px 14px;border-bottom:1px solid var(--border)}
 .upd small{font-size:10px;letter-spacing:1px;color:var(--muted);white-space:nowrap}
-.upd .inp{max-width:130px;padding:6px 9px;font-size:13px}
+.upd .inp{max-width:135px;padding:6px 9px;font-size:13px}
 .nt{padding:9px 14px;background:rgba(16,185,129,.04)}
 .nt small{display:block;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:6px}
 .nr{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
@@ -150,6 +150,23 @@ nav button.on{color:#fff;background:rgba(59,130,246,.2);box-shadow:inset 0 3px 0
 </header>
 <div class="bar">Alert 500 KM before due &nbsp;|&nbsp; Engine Oil + Filter: every 12 months (from last service / date entered service), alert 30 days before &nbsp;|&nbsp; I=Inspect R=Replace L=Lubricate</div>
 <main>
+
+<!-- DRIVER REMOTE UPDATE PORTAL (opens when URL has ?driver_update=...) -->
+<div id="driverPortal" style="display:none">
+  <div class="box" style="border-color:var(--accent)">
+    <div class="h2">📲 Driver KM & Date Update Link</div>
+    <div class="ms" id="dpInfo">Loading vehicle details...</div>
+    <div id="dpForm">
+      <div class="fl"><label>Current Odometer KM *</label><input class="inp" id="dpKm" type="number" min="0" placeholder="Enter current KM"></div>
+      <div class="fl"><label>Update Date *</label><input class="inp" id="dpDate" type="date"></div>
+      <div class="foot" style="margin-top:12px">
+        <button class="btn btn-ok" style="flex:1;padding:12px" onclick="submitDriverUpdate()">✅ Submit KM & Date</button>
+        <button class="btn btn-o" style="padding:12px" onclick="exitDriverPortal()">← Open Dashboard</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="viewDash">
   <div id="banner"><div class="bn-h" onclick="toggleBn()"><div><span class="bn-t" id="bnT">SERVICE ALERT</span><span class="bn-c" id="bnC">0</span></div><span id="bnA">▼</span></div><div id="bnItems"></div></div>
   <div class="sum" id="sum"></div>
@@ -158,7 +175,7 @@ nav button.on{color:#fff;background:rgba(59,130,246,.2);box-shadow:inset 0 3px 0
     <div class="srow"><input class="inp" id="q" placeholder="Search by registration no. / unit / formation" oninput="doSearch()" autocomplete="off"><button class="btn btn-o" onclick="clearSearch()">✕</button></div>
     <div id="sres" style="margin-top:12px"></div>
   </div>
-  <details class="box" id="allBox"><summary class="h2" id="allT" style="padding:0;cursor:pointer;margin:0">📂 All vehicles</summary><div class="wrap" style="margin-top:10px"><table class="ht"><thead><tr><th>Regn</th><th>Unit</th><th>Formation</th><th>KM</th><th>Status</th><th>Edit / Remove</th></tr></thead><tbody id="allRows"></tbody></table></div></details>
+  <details class="box" id="allBox"><summary class="h2" id="allT" style="padding:0;cursor:pointer;margin:0">📂 All vehicles</summary><div class="wrap" style="margin-top:10px"><table class="ht"><thead><tr><th>Regn</th><th>Unit</th><th>Formation</th><th>KM</th><th>Last KM Date</th><th>Status</th><th>Edit / Remove</th></tr></thead><tbody id="allRows"></tbody></table></div></details>
   <div id="dueBox" style="display:none"><div class="h2" id="dueT">🚨 Service Due / Overdue</div><div id="dueList"></div></div>
   <div class="box">
     <div class="h2">💾 Data</div>
@@ -205,20 +222,20 @@ nav button.on{color:#fff;background:rgba(59,130,246,.2);box-shadow:inset 0 3px 0
   <div id="svcOil" style="display:none"><div class="ms">Only the Engine Oil + Filter were changed (both Replace)? This does not affect the KM-milestone service; it only restarts the 1-year timer.</div></div>
   
   <!-- LOG BREAKDOWN SERVICE BUTTON -->
-  <button onclick="toggleBreakdownForm()" style="background: #ef4444; color: #fff; border: none; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 14px; width: 100%;">
+  <button type="button" onclick="toggleBreakdownForm()" style="background: #ef4444; color: #fff; border: none; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 14px; width: 100%;">
       LOG BREAKDOWN SERVICE
   </button>
 
   <!-- Breakdown Form (Hidden by default) -->
   <div id="breakdownSection" style="display: none; background: var(--panel); padding: 14px; border-radius: 10px; margin-top: 10px; border: 1px solid #ef4444;">
       <h4 style="color: #ef4444; margin-bottom: 8px; font-family: 'Teko', sans-serif; font-size: 18px;">Breakdown & Repair Entry</h4>
-      <form id="breakdownLogForm" onsubmit="saveBreakdown(event)" style="display: flex; flex-direction: column; gap: 8px;">
-          <input type="date" id="bDate" required style="padding: 6px; border-radius: 6px; background: var(--bg); color: var(--text); border: 1px solid var(--border);">
-          <input type="number" id="bKm" placeholder="Current Kilometers (KM)" required style="padding: 6px; border-radius: 6px; background: var(--bg); color: var(--text); border: 1px solid var(--border);">
-          <textarea id="bFault" placeholder="Fault / Breakdown Reason (e.g., Cam roller failure)" rows="2" required style="padding: 6px; border-radius: 6px; background: var(--bg); color: var(--text); border: 1px solid var(--border);"></textarea>
-          <textarea id="bRepairActivity" placeholder="Spares Used / Repair Activity" rows="2" required style="padding: 6px; border-radius: 6px; background: var(--bg); color: var(--text); border: 1px solid var(--border);"></textarea>
-          <button type="submit" style="background: #3b82f6; color: #fff; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer;">Save Breakdown Record</button>
-      </form>
+      <div id="breakdownLogForm" style="display: flex; flex-direction: column; gap: 8px;">
+          <input type="date" id="bDate" style="padding: 6px; border-radius: 6px; background: var(--bg); color: var(--text); border: 1px solid var(--border);">
+          <input type="number" id="bKm" placeholder="Current Kilometers (KM)" style="padding: 6px; border-radius: 6px; background: var(--bg); color: var(--text); border: 1px solid var(--border);">
+          <textarea id="bFault" placeholder="Fault / Breakdown Reason (e.g., Cam roller failure)" rows="2" style="padding: 6px; border-radius: 6px; background: var(--bg); color: var(--text); border: 1px solid var(--border);"></textarea>
+          <textarea id="bRepairActivity" placeholder="Spares Used / Repair Activity" rows="2" style="padding: 6px; border-radius: 6px; background: var(--bg); color: var(--text); border: 1px solid var(--border);"></textarea>
+          <button type="button" onclick="saveBreakdown()" style="background: #3b82f6; color: #fff; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer;">Save Breakdown Record</button>
+      </div>
   </div>
 
   <div class="ma"><button class="btn btn-ok" onclick="saveSvc()">✅ Save</button><button class="btn btn-o" onclick="hide('svcModal')">Cancel</button></div>
@@ -237,66 +254,71 @@ nav button.on{color:#fff;background:rgba(59,130,246,.2);box-shadow:inset 0 3px 0
 <script>
 // ===LOGIC-START===
 const WARN_KM=500, WARN_DAYS=30, OIL_MONTHS=12;
-const rng=(a,b,s)=>{const r=[];for(let k=a;k<=b;k+=s)r.push(k);return r;};
-const ALL=rng(10000,100000,5000);            // 10000,15000,...,100000 (2000 & 4000 removed)
-const TEN=rng(10000,100000,10000);           // 10000,20000,...
-const ODD5=rng(15000,95000,10000);           // 15000,25000,...,95000
-const E15=rng(15000,90000,15000);            // 15000,30000,...,90000
-const E20=rng(20000,100000,20000);           // 20000,40000,...,100000
-const MS=ALL;
+// Mahindra Defence Systems Manual Chart (pp. 27-29) columns in KM
+const MS=[2000,4000,10000,15000,20000,25000,30000,35000,40000,45000,50000,55000,60000,65000,70000,75000,80000,85000,90000,95000,100000];
+const FROM_2000=[2000,4000,10000,15000,20000,25000,30000,35000,40000,45000,50000,55000,60000,65000,70000,75000,80000,85000,90000,95000,100000];
+const FROM_4000=[4000,10000,15000,20000,25000,30000,35000,40000,45000,50000,55000,60000,65000,70000,75000,80000,85000,90000,95000,100000];
+const FROM_10000=[10000,15000,20000,25000,30000,35000,40000,45000,50000,55000,60000,65000,70000,75000,80000,85000,90000,95000,100000];
+const FROM_15000=[15000,20000,25000,30000,35000,40000,45000,50000,55000,60000,65000,70000,75000,80000,85000,90000,95000,100000];
+const E15_OIL=[15000,30000,45000,60000,75000,90000];
+const E15_FIL=[15000,30000,45000,60000,75000,90000,100000];
+const E10_ODD=[15000,25000,35000,45000,55000,65000,75000,85000,95000];
+const E10_TEN=[10000,20000,30000,40000,50000,60000,70000,80000,90000,100000];
+
 function T(name,s){const m={};(s.I||[]).forEach(k=>m[k]='I');(s.L||[]).forEach(k=>m[k]='L');(s.R||[]).forEach(k=>m[k]='R');return{name,map:m,everyKm:s.everyKm||0,note:s.note||''};}
-// Source: Mahindra Defence Systems "Recommended Maintenance Schedule Chart" (manual pp. 27-29)
+
+// Matched strictly to Mahindra Defence Systems Limited Recommended Maintenance Schedule Chart (pp. 27-29)
 const SCHEDULE=[
  {cat:'Engine',tasks:[
-  T('Engine Oil',{I:ALL,R:E15}),
-  T('Engine Oil Filter',{I:ALL,R:E15}),
-  T('Fuel Pre-filter',{I:ALL,R:E20}),
-  T('Fuel Main Filter',{I:ALL,R:E20}),
-  T('Accessory Drive Belt & Tensioner',{I:ALL,R:[100000]}),
-  T('Coolant',{I:ALL,R:E20}),
-  T('Coolant Hoses and Pipes',{I:TEN,R:[50000,100000]}),
-  T('Vacuum Connections',{I:ALL}),
-  T('Pneumatic Connections',{I:ALL}),
-  T('Diagnostic Codes',{I:TEN})]},
+  T('Engine Oil',{I:[4000,10000,20000,25000,35000,40000,50000,55000,65000,70000,80000,85000,95000,100000],R:[2000,...E15_OIL]}),
+  T('Engine Oil Filter',{I:[4000,10000,20000,25000,35000,40000,50000,55000,65000,70000,80000,85000,95000,100000],R:[2000,...E15_OIL]}),
+  T('Fuel Pre-filter',{I:[2000,4000,10000,20000,25000,35000,40000,50000,55000,65000,70000,80000,85000,95000],R:E15_FIL}),
+  T('Fuel Main Filter',{I:[2000,4000,10000,20000,25000,35000,40000,50000,55000,65000,70000,80000,85000,95000],R:E15_FIL}),
+  T('Accessory Drive Belt & Tensioner',{I:FROM_4000.filter(k=>k!==100000),R:[100000]}),
+  T('Coolant',{I:[2000,4000,10000,20000,25000,35000,40000,50000,55000,65000,70000,80000,85000,95000],R:E15_FIL}),
+  T('Coolant Hoses and Pipes',{I:FROM_4000.filter(k=>k!==50000&&k!==100000),R:[50000,100000]}),
+  T('Vacuum Connections',{I:FROM_2000}),
+  T('Pneumatic Connections',{I:FROM_2000}),
+  T('Diagnostic Codes',{I:FROM_4000})]},
  {cat:'Air, Fuel and Exhaust',tasks:[
-  T('Air Filter Element (Pre & Main)',{I:ALL,R:E15}),
-  T('Water Sediments Drain (Fuel Filter)',{I:ALL}),
-  T('Fuel Hoses',{I:TEN,R:[50000,100000]}),
-  T('Air Hoses and Pipes',{I:TEN}),
-  T('AC Particle Filter',{I:TEN,R:E20}),
-  T('Air Drier Cartridge',{R:TEN})]},
+  T('Air Filter Element (Pre & Main)',{I:[2000,4000,10000,20000,25000,35000,40000,50000,55000,65000,70000,80000,85000,95000],R:E15_FIL}),
+  T('Water Sediments Drain (Fuel Filter)',{I:FROM_2000}),
+  T('Fuel Hoses',{I:FROM_4000.filter(k=>k!==50000&&k!==100000),R:[50000,100000]}),
+  T('Air Hoses and Pipes',{I:[4000,20000,30000,40000,50000,60000,70000,80000,90000,100000],R:[15000,...E10_ODD]}),
+  T('AC Particle Filter',{I:[4000,20000,30000,40000,50000,60000,70000,80000,90000,100000],R:[15000,...E10_ODD]}),
+  T('Air Drier Cartridge',{R:FROM_10000})]},
  {cat:'Transmission',tasks:[
-  T('Transmission Oil',{I:ALL,R:[50000,100000]}),
-  T('Transfer Case Oil',{I:ALL,R:[50000,100000]}),
+  T('Transmission Oil',{I:FROM_4000.filter(k=>k!==50000&&k!==100000),R:[50000,100000]}),
+  T('Transfer Case Oil',{I:FROM_4000.filter(k=>k!==50000&&k!==100000),R:[50000,100000]}),
   T('Transmission Filter',{R:[50000,100000]})]},
  {cat:'Axles, Wheels & Tyres',tasks:[
-  T('Differential Oil (Rear)',{I:ALL,R:[40000,80000]}),
-  T('Differential Oil (Front)',{I:ALL,R:[40000,80000]}),
-  T('Hub Oil - Front Axle',{I:ALL,R:[40000,80000]}),
-  T('Hub Oil - Rear Axle',{I:ALL,R:[40000,80000]}),
-  T('Prop-shaft U-Joints Grease',{L:TEN}),
-  T('Tyre Rotation',{I:TEN}),
-  T('Water Drainage of Compressed Air Chamber',{I:ODD5})]},
+  T('Differential Oil (Rear)',{I:FROM_4000.filter(k=>k!==40000&&k!==80000),R:[2000,40000,80000]}),
+  T('Differential Oil (Front)',{I:FROM_4000.filter(k=>k!==40000&&k!==80000),R:[2000,40000,80000]}),
+  T('Hub Oil - Front Axle',{I:FROM_4000.filter(k=>k!==40000&&k!==80000),R:[2000,40000,80000]}),
+  T('Hub Oil - Rear Axle',{I:FROM_4000.filter(k=>k!==40000&&k!==80000),R:[2000,40000,80000]}),
+  T('Prop-shaft U-Joints Grease',{L:E10_TEN}),
+  T('Tyre Rotation',{I:E10_TEN}),
+  T('Water Drainage of Compressed Air Chamber',{I:FROM_2000})]},
  {cat:'Brakes',tasks:[
-  T('Brake Fluid Level',{I:ALL,R:E20}),
-  T('Brake Pads',{I:TEN,R:[40000,80000],note:'Manual note: Brake pad inspect & replace every 10,000 km'})]},
+  T('Brake Fluid Level',{I:[2000,4000,10000,20000,25000,35000,40000,50000,55000,65000,70000,80000,85000,95000,100000],R:[15000,...E15_OIL]}),
+  T('Brake Pads',{I:[10000,15000,20000,25000,35000,40000,45000,50000,55000,60000,65000,70000,75000,85000,90000,95000,100000],R:[30000,80000],note:'Manual chart: Inspect & Replace per schedule'})]},
  {cat:'Suspension & Steering',tasks:[
-  T('Suspension Ball Joints',{I:E20}),
-  T('Suspension Arms & Links',{I:E20}),
-  T('Power Steering Fluid Level',{I:ALL,R:[40000,80000]}),
-  T('Wheel Alignment',{everyKm:40000,note:'Inspect if abnormal conditions noticed, or every 40,000 km (whichever earlier)'})]},
+  T('Suspension Ball Joints',{I:[20000,40000,60000,80000,100000]}),
+  T('Suspension Arms & Links',{I:[20000,40000,60000,80000,100000]}),
+  T('Power Steering Fluid Level',{I:FROM_2000.filter(k=>k!==40000&&k!==80000),R:[40000,80000]}),
+  T('Wheel Alignment',{everyKm:40000,note:'Inspect if abnormal conditions noticed or every 40,000 km, whichever is earlier'})]},
  {cat:'Electricals',tasks:[
-  T('All Lights, Horn, Wipers & Washers',{I:TEN}),
-  T('Battery Terminals',{I:ALL})]},
+  T('All Lights, Horn, Wipers & Washers',{I:E10_TEN}),
+  T('Battery Terminals',{I:FROM_2000})]},
  {cat:'Final Inspection',tasks:[
-  T('Tyre Pressure',{I:ALL}),
-  T('Under Chassis Nuts & Bolts (Tightness)',{I:ODD5}),
-  T('Exhaust Pipe Mountings & Damage / Leakage',{I:ODD5}),
-  T('Road Test',{I:ALL})]}
+  T('Tyre Pressure',{I:FROM_2000}),
+  T('Under Chassis Nuts & Bolts (Tightness)',{I:E10_TEN}),
+  T('Exhaust Pipe Mountings & Damage / Leakage',{I:E10_TEN}),
+  T('Road Test',{I:FROM_2000})]}
 ];
 const RANK={I:1,L:2,R:3};
 function taskAction(t,absKm){
-  const cyc=((absKm-1)%100000)+1;          // chart repeats every 100000 km
+  const cyc=((absKm-1)%100000)+1;
   let a=t.map[cyc]||'';
   if(!a&&t.everyKm&&absKm%t.everyKm===0)a='I';
   return a;
@@ -353,8 +375,8 @@ function vehInfo(v,today){
   const status=P[kmStatus]>=P[oil.status]?kmStatus:oil.status;
   const reasons=[];
   if(kmStatus!=='ok')reasons.push({kind:'KM',lv:kmStatus,text:'Service @ '+nxt.toLocaleString('en-IN')+' KM — '+(kmLeft<0?(-kmLeft).toLocaleString('en-IN')+' KM overdue':kmLeft===0?'due now':kmLeft.toLocaleString('en-IN')+' KM remaining')});
-  if(oil.status==='due-now')reasons.push({kind:'TIME',lv:'due-now',text:'Engine Oil + Filter change due — 1 year completed (due '+fmtD(oil.due)+(oil.left<0?', '+(-oil.left)+' days overdue':'')+')'});
-  if(oil.status==='due-soon')reasons.push({kind:'TIME',lv:'due-soon',text:'Engine Oil + Filter — 1 year completes in '+oil.left+' day'+(oil.left===1?'':'s')+' ('+fmtD(oil.due)+')'});
+  if(oil.status==='due-now')reasons.push({kind:'TIME',lv:'due-now',text:'Engine Oil + Filter change due — 12 months completed (due '+fmtD(oil.due)+(oil.left<0?', '+(-oil.left)+' days overdue':'')+')'});
+  if(oil.status==='due-soon')reasons.push({kind:'TIME',lv:'due-soon',text:'Engine Oil + Filter — 12 months complete in '+oil.left+' day'+(oil.left===1?'':'s')+' ('+fmtD(oil.due)+')'});
   const groups=collectTasks(ms,oil.status==='due-now');
   return{cur,last,nxt,kmLeft,kmStatus,target,ms,oil,status,reasons,groups};
 }
@@ -384,6 +406,19 @@ let tt;function toast(m,err){const t=$('toast');t.textContent=m;t.className=(err
 const ACT={I:'🔍 INSPECT',R:'🔄 REPLACE',L:'🛢️ LUBRICATE'};
 const COL={'due-now':'var(--danger)','due-soon':'var(--warn)','ok':'var(--green)'};
 
+function driverLinkURL(v){
+  return window.location.origin+window.location.pathname+'?driver_update='+encodeURIComponent(v.id);
+}
+function copyDriverLink(id){
+  const v=get(id);if(!v)return;
+  const url=driverLinkURL(v);
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(()=>toast('🔗 Driver link copied for '+v.regn)).catch(()=>prompt('Copy driver link:',url));
+  }else{
+    prompt('Copy driver link:',url);
+  }
+}
+
 function cardHTML(v){
   const I=vehInfo(v,todayISO()),col=COL[I.status];
   const pct=Math.max(0,Math.min(100,((I.cur-I.last)/(I.nxt-I.last))*100));
@@ -391,12 +426,13 @@ function cardHTML(v){
   let reasons=I.reasons.map(r=>'<div class="rs '+r.lv+'">'+(r.kind==='KM'?'📍 ':'⏱️ ')+esc(r.text)+'</div>').join('');
   if(!reasons)reasons='<div class="rs" style="color:#94a3b8">'+fmt(I.kmLeft)+' KM remaining'+(I.oil.status==='ok'?' • Engine Oil + Filter time limit: '+fmtD(I.oil.due):'')+'</div>';
   let inf='<div>🔧 Last service: '+(v.lastSvcDate?fmtD(v.lastSvcDate):'—')+' @ '+fmt(v.lastSvcKm)+' KM</div>';
+  inf+='<div>📅 Last KM update date: '+(v.lastKmDate?fmtD(v.lastKmDate):'—')+'</div>';
   if(v.inServiceDate)inf+='<div>🚙 In service since: '+fmtD(v.inServiceDate)+'</div>';
   if(v.lastOilDate)inf+='<div>🛢️ Last Engine Oil + Filter change: '+fmtD(v.lastOilDate)+'</div>';
-  if(I.oil.status==='nodate')inf+='<div class="w">⚠️ No date on record — the 1-year Engine Oil + Filter time check is off. Edit the vehicle and enter a date.</div>';
+  if(I.oil.status==='nodate')inf+='<div class="w">⚠️ No date on record — the 12-month Engine Oil + Filter time check is off. Edit the vehicle and enter a date.</div>';
   else inf+='<div>⏱️ Engine Oil + Filter time limit: '+fmtD(I.oil.due)+' ('+(I.oil.left<=0?(-I.oil.left)+' days overdue':I.oil.left+' days left')+') — based on '+esc(I.oil.src)+'</div>';
   const skip=I.ms.length>1?'<div class="tn2">⚠️ '+I.ms.length+' milestones were skipped ('+fmt(I.ms[0])+' – '+fmt(I.ms[I.ms.length-1])+' KM) — Replace/Lube items from the skipped milestones are included.</div>':'';
-  let n=0;const tasks=I.groups.map(g=>{n+=g.items.length;return'<div class="tg">'+esc(g.cat)+'</div>'+g.items.map(t=>'<div class="tr"><div class="tn">'+esc(t.name)+(t.note?'<div class="tnote">'+esc(t.note)+'</div>':'')+(t.timeOv?'<span class="ttag">⏱ 1 year completed — replace oil + filter</span>':'')+'</div><span class="act a'+t.action+'">'+ACT[t.action]+'</span></div>').join('');}).join('');
+  let n=0;const tasks=I.groups.map(g=>{n+=g.items.length;return'<div class="tg">'+esc(g.cat)+'</div>'+g.items.map(t=>'<div class="tr"><div class="tn">'+esc(t.name)+(t.note?'<div class="tnote">'+esc(t.note)+'</div>':'')+(t.timeOv?'<span class="ttag">⏱ 12 months completed — replace oil + filter</span>':'')+'</div><span class="act a'+t.action+'">'+ACT[t.action]+'</span></div>').join('');}).join('');
   const lbl=I.kmStatus==='ok'?'Next service @ '+fmt(I.nxt)+' KM — preview ('+n+' tasks)':'Tasks due @ '+fmt(I.target)+' KM — '+n+' tasks';
   const nt=(I.status!=='ok'||v.driverName||v.driverWA||v.driverEmail)?notifyHTML(v,I):'';
   return'<div class="card '+I.status+'"><div class="ch"><div class="ci"><div class="cico">🚙</div><div><div class="cr">'+esc(v.regn)+'</div><div class="cs">Mahindra Armado • Vintage '+esc(v.vintage)+'</div>'+((v.unit||v.formation)?'<div class="cs">'+(v.unit?'Unit: '+esc(v.unit):'')+(v.unit&&v.formation?' • ':'')+(v.formation?'Formation: '+esc(v.formation):'')+'</div>':'')+'</div></div><div class="cb"><button class="btn btn-o btn-s" onclick="openVeh(\''+v.id+'\')">✏️ Edit</button><button class="btn btn-d btn-s" onclick="delVeh(\''+v.id+'\')">🗑 Remove</button></div></div>'
@@ -404,19 +440,21 @@ function cardHTML(v){
   +'<div class="inf">'+inf+'</div>'
   +'<div class="al" style="background:'+(I.status==='ok'?'rgba(16,185,129,.06)':I.status==='due-now'?'rgba(239,68,68,.1)':'rgba(249,115,22,.1)')+'"><div><b style="color:'+col+'">'+title+'</b>'+reasons+'</div><button class="btn btn-g" onclick="openSvc(\''+v.id+'\')">LOG SERVICE</button></div>'
   +'<details'+(I.kmStatus!=='ok'?' open':'')+'><summary>▼ '+esc(lbl)+'</summary><div class="tl">'+skip+tasks+'</div></details>'
-  +'<div class="upd"><small>UPDATE KM →</small><input class="inp" type="number" min="0" placeholder="Odometer KM"><button class="btn btn-p btn-s" onclick="updKm(\''+v.id+'\',this)">UPDATE</button><button class="btn btn-o btn-s" onclick="openRecord(\''+v.id+'\')">📋 Service record</button></div>'+nt+'</div>';
+  +'<div class="upd"><small>UPDATE KM →</small><input class="inp km-inp" type="number" min="0" placeholder="Odometer KM"><input class="inp dt-inp" type="date" value="'+todayISO()+'"><button class="btn btn-p btn-s" onclick="updKm(\''+v.id+'\',this)">UPDATE</button><button class="btn btn-g btn-s" onclick="copyDriverLink(\''+v.id+'\')">🔗 Driver Link</button><button class="btn btn-o btn-s" onclick="openRecord(\''+v.id+'\')">📋 Service record</button></div>'+nt+'</div>';
 }
 function msgText(v,I){
   const l=I.reasons.map(r=>'• '+r.text);
-  return'🚙 SERVICE ALERT — ARMADO TRACK\n\nVehicle: '+v.regn+' (Mahindra Armado)\n'+(v.unit?'Unit: '+v.unit+'\n':'')+(v.formation?'Formation: '+v.formation+'\n':'')+'Current KM: '+fmt(I.cur)+'\n\n'+(l.length?l.join('\n'):'• Service reminder')+'\n\nPlease report to the workshop with your vehicle.\n— Workshop Manager';
+  const dLink=driverLinkURL(v);
+  return'🚙 SERVICE ALERT — ARMADO TRACK\n\nVehicle: '+v.regn+' (Mahindra Armado)\n'+(v.unit?'Unit: '+v.unit+'\n':'')+(v.formation?'Formation: '+v.formation+'\n':'')+'Current KM: '+fmt(I.cur)+'\n\n'+(l.length?l.join('\n'):'• Service reminder')+'\n\n📲 Update KM & Date here:\n'+dLink+'\n\nPlease report to the workshop with your vehicle.\n— Workshop Manager';
 }
 function notifyHTML(v,I){
   const m=msgText(v,I);let wa='';
   let num=String(v.driverWA||'').replace(/\D/g,'');if(num.length===10)num='91'+num;
   if(num)wa='<a class="btn btn-s wa" target="_blank" rel="noopener" href="https://wa.me/'+num+'?text='+encodeURIComponent(m)+'">💬 WhatsApp</a>';
+  const cp='<button class="btn btn-g btn-s" onclick="copyDriverLink(\''+v.id+'\')">🔗 Copy KM Link</button>';
   const rm=(v.driverName||v.driverWA||v.driverEmail)?'<button class="btn btn-d btn-s" onclick="clearDriver(\''+v.id+'\')">🗑 Remove driver</button>':'';
   const em=v.driverEmail?'<a class="btn btn-s ml" href="mailto:'+esc(v.driverEmail)+'?subject='+encodeURIComponent('Service Alert — '+v.regn)+'&body='+encodeURIComponent(m)+'">✉️ Email</a>':'';
-  return'<div class="nt"><small>📣 Notify driver</small><div class="nr"><div class="d">'+(v.driverName?esc(v.driverName):'No driver added')+'<span>'+(v.driverWA?'📱 '+esc(v.driverWA):'')+' '+(v.driverEmail?'✉️ '+esc(v.driverEmail):'')+'</span></div>'+wa+em+rm+'</div></div>';
+  return'<div class="nt"><small>📣 Notify driver</small><div class="nr"><div class="d">'+(v.driverName?esc(v.driverName):'No driver added')+'<span>'+(v.driverWA?'📱 '+esc(v.driverWA):'')+' '+(v.driverEmail?'✉️ '+esc(v.driverEmail):'')+'</span></div>'+wa+em+cp+rm+'</div></div>';
 }
 
 function renderAll(){
@@ -439,8 +477,8 @@ function renderAll(){
 function renderAllList(infos){
   $('allT').textContent='📂 All vehicles ('+infos.length+') — Edit / Remove from here';
   const L={'due-now':'🔴 Due','due-soon':'🟠 Soon','ok':'🟢 OK'};
-  const rows=infos.slice().sort((a,b)=>a.v.regn.localeCompare(b.v.regn)).map(x=>'<tr><td><a href="#" style="color:var(--accent);text-decoration:none" onclick="goVeh(\''+x.v.id+'\');return false"><b>'+esc(x.v.regn)+'</b></a></td><td>'+esc(x.v.unit||'—')+'</td><td>'+esc(x.v.formation||'—')+'</td><td class="mono">'+fmt(x.v.currentKm)+'</td><td>'+L[x.I.status]+'</td><td style="white-space:nowrap"><button class="btn btn-o btn-s" onclick="openVeh(\''+x.v.id+'\')">✏️ Edit</button> <button class="btn btn-d btn-s" onclick="delVeh(\''+x.v.id+'\')">🗑 Remove</button></td></tr>');
-  $('allRows').innerHTML=rows.length?rows.join(''):'<tr><td colspan="6" class="empty">No vehicles added yet</td></tr>';
+  const rows=infos.slice().sort((a,b)=>a.v.regn.localeCompare(b.v.regn)).map(x=>'<tr><td><a href="#" style="color:var(--accent);text-decoration:none" onclick="goVeh(\''+x.v.id+'\');return false"><b>'+esc(x.v.regn)+'</b></a></td><td>'+esc(x.v.unit||'—')+'</td><td>'+esc(x.v.formation||'—')+'</td><td class="mono">'+fmt(x.v.currentKm)+'</td><td class="mono">'+(x.v.lastKmDate?fmtD(x.v.lastKmDate):'—')+'</td><td>'+L[x.I.status]+'</td><td style="white-space:nowrap"><button class="btn btn-g btn-s" onclick="copyDriverLink(\''+x.v.id+'\')">🔗 Link</button> <button class="btn btn-o btn-s" onclick="openVeh(\''+x.v.id+'\')">✏️ Edit</button> <button class="btn btn-d btn-s" onclick="delVeh(\''+x.v.id+'\')">🗑 Remove</button></td></tr>');
+  $('allRows').innerHTML=rows.length?rows.join(''):'<tr><td colspan="7" class="empty">No vehicles added yet</td></tr>';
 }
 function renderRec(){
   const q=norm($('rq').value);
@@ -492,16 +530,26 @@ function saveVeh(){
   if((ld&&ld>today)||(id2&&id2>today))return toast('Future dates are not allowed',true);
   if(state.vehicles.some(v=>v.id!==editId&&norm(v.regn)===norm(regn)))return toast('This registration number already exists',true);
   const f={vintage:vin,unit:$('fUnit').value.trim(),formation:$('fForm').value.trim(),currentKm:km,lastSvcKm:lastKm,lastSvcDate:ld||'',inServiceDate:id2||'',driverName:$('fDn').value.trim(),driverWA:$('fDw').value.trim(),driverEmail:$('fDe').value.trim()};
-  if(editId){const v=get(editId);if(f.lastSvcKm!==v.lastSvcKm)v.lastMs=0;if(v.regn!==regn)state.history.forEach(h=>{if(h.regn===v.regn)h.regn=regn;});v.regn=regn;Object.assign(v,f);}
-  else state.vehicles.push(Object.assign({id:uid(),regn:regn,lastOilDate:'',lastMs:0},f));
+  if(editId){const v=get(editId);if(f.lastSvcKm!==v.lastSvcKm)v.lastMs=0;if(v.regn!==regn)state.history.forEach(h=>{if(h.regn===v.regn)h.regn=regn;});if(f.currentKm!==v.currentKm)v.lastKmDate=today;v.regn=regn;Object.assign(v,f);}
+  else state.vehicles.push(Object.assign({id:uid(),regn:regn,lastOilDate:'',lastMs:0,lastKmDate:today},f));
   save();hide('vehModal');renderAll();toast(editId?'✅ Vehicle updated':'✅ '+regn+' added');
 }
 function delVeh(id){const v=get(id);if(!v)return;if(!confirm('Remove '+v.regn+'? This cannot be undone.'))return;state.vehicles=state.vehicles.filter(x=>x.id!==id);save();hide('vehModal');renderAll();toast('🗑️ '+v.regn+' removed');}
 function updKm(id,btn){
-  const i=btn.parentNode.querySelector('input'),val=parseInt(i.value),v=get(id);
+  const parent=btn.parentNode;
+  const i=parent.querySelector('.km-inp');
+  const dInp=parent.querySelector('.dt-inp');
+  const val=parseInt(i.value),v=get(id);
+  const dt=(dInp&&dInp.value)?dInp.value:todayISO();
   if(isNaN(val)||val<0)return toast('Enter a valid KM',true);
+  if(!pISO(dt))return toast('Select a valid date',true);
+  if(dt>todayISO())return toast('Future dates are not allowed',true);
   if(val<v.currentKm)return toast('New KM is lower than the current KM ('+fmt(v.currentKm)+'). Use Edit to correct a mistake.',true);
-  v.currentKm=val;save();renderAll();toast('✅ '+v.regn+' → '+fmt(val)+' KM');
+  const prevKm=v.currentKm;
+  v.currentKm=val;
+  v.lastKmDate=dt;
+  state.history.unshift({date:dt,regn:v.regn,type:'KM Update',km:val,details:'KM updated from '+fmt(prevKm)+' to '+fmt(val)+' on '+fmtD(dt)});
+  save();renderAll();toast('✅ '+v.regn+' → '+fmt(val)+' KM ('+fmtD(dt)+')');
 }
 
 // ----- bulk km -----
@@ -514,10 +562,14 @@ function openBulk(){
 function filterBulk(){const q=norm($('bulkQ').value);document.querySelectorAll('#bulkList .brow').forEach(r=>{r.style.display=(!q||r.dataset.n.indexOf(q)>-1)?'flex':'none';});}
 function saveBulk(){
   let n=0,low=[];
+  const today=todayISO();
   document.querySelectorAll('#bulkList input').forEach(i=>{
     if(!i.value.trim())return;const v=get(i.dataset.id),val=parseInt(i.value);if(!v||isNaN(val))return;
     if(val<v.currentKm){low.push(v.regn);return;}
-    v.currentKm=val;n++;
+    const prev=v.currentKm;
+    v.currentKm=val;v.lastKmDate=today;
+    state.history.unshift({date:today,regn:v.regn,type:'KM Update',km:val,details:'Bulk KM updated from '+fmt(prev)+' to '+fmt(val)});
+    n++;
   });
   if(!n&&!low.length)return toast('No KM entered',true);
   save();renderAll();
@@ -544,7 +596,7 @@ function setMode(m){
 }
 function buildSvcTasks(){
   const v=get(svc.id),I=vehInfo(v,todayISO());svc.list=[];let h='';
-  I.groups.forEach(g=>{h+='<div class="tg">'+esc(g.cat)+'</div>';g.items.forEach(t=>{svc.list.push(t);h+='<label class="chk"><input type="checkbox" data-i="'+(svc.list.length-1)+'"><div class="tn">'+esc(t.name)+(t.timeOv?'<span class="ttag">⏱ 1 year completed</span>':'')+'</div><span class="act a'+t.action+'">'+ACT[t.action]+'</span></label>';});});
+  I.groups.forEach(g=>{h+='<div class="tg">'+esc(g.cat)+'</div>';g.items.forEach(t=>{svc.list.push(t);h+='<label class="chk"><input type="checkbox" data-i="'+(svc.list.length-1)+'"><div class="tn">'+esc(t.name)+(t.timeOv?'<span class="ttag">⏱ 12 months completed — replace oil + filter</span>':'')+'</div><span class="act a'+t.action+'">'+ACT[t.action]+'</span></label>';});});
   $('svcTasks').innerHTML=h;
   $('svcNote').textContent=I.ms.length>1?'⚠️ '+I.ms.length+' milestones were skipped — Replace/Lube items from them are included in this list.':(I.kmStatus==='ok'?'KM service is not due yet (preview). Log it only if you are servicing early.':'');
 }
@@ -555,16 +607,16 @@ function saveSvc(){
   if(!pISO(date))return toast('Select a date',true);
   if(date>today)return toast('Future dates are not allowed',true);
   if(svc.mode==='oil'){
-    v.lastOilDate=date;v.currentKm=Math.max(v.currentKm,km);
-    state.history.unshift({date,regn:v.regn,type:'Engine Oil + Filter',km,details:'Engine Oil + Filter change [R] (time-based) — 1-year timer restarted'});
+    v.lastOilDate=date;v.currentKm=Math.max(v.currentKm,km);v.lastKmDate=date;
+    state.history.unshift({date,regn:v.regn,type:'Engine Oil + Filter',km,details:'Engine Oil + Filter change [R] (12-month time-based) — 12-month timer restarted'});
   }else{
     const boxes=[...document.querySelectorAll('#svcTasks input')],done=boxes.filter(b=>b.checked).map(b=>svc.list[+b.dataset.i]);
     const miss=boxes.length-done.length;
     if(miss>0&&!confirm(miss+' task(s) not ticked. Mark the service as complete anyway?'))return;
     const base=Math.max(+v.lastSvcKm||0,+v.lastMs||0),nxt=nextMilestoneAfter(base);
     v.lastMs=km>=nxt?lastMilestoneAtOrBelow(km):nxt;
-    v.lastSvcKm=km;v.lastSvcDate=date;v.currentKm=Math.max(v.currentKm,km);
-    if(done.some(t=>t.name==='Engine Oil'&&t.action==='R'))v.lastOilDate=date;
+    v.lastSvcKm=km;v.lastSvcDate=date;v.currentKm=Math.max(v.currentKm,km);v.lastKmDate=date;
+    if(done.some(t=>t.name==='Engine Oil'&&t.action==='R')||done.some(t=>t.name==='Engine Oil Filter'&&t.action==='R'))v.lastOilDate=date;
     state.history.unshift({date,regn:v.regn,type:'Full service ('+fmt(v.lastMs)+' KM)',km,details:done.length?done.map(t=>t.name+' ['+t.action+']').join(', '):'(no tasks ticked)'});
   }
   save();hide('svcModal');renderAll();toast('✅ Service logged — '+v.regn);
@@ -575,13 +627,12 @@ function toggleBreakdownForm(){
   const sec = $('breakdownSection');
   sec.style.display = sec.style.display === 'none' ? 'block' : 'none';
   if(sec.style.display === 'block'){
-    $('bDate').value = todayISO();
+    $('bDate').value = $('svcDate').value || todayISO();
     $('bKm').value = $('svcKm').value || '';
   }
 }
 
-function saveBreakdown(e){
-  e.preventDefault();
+function saveBreakdown(){
   const v = get(svc.id);
   if(!v) return;
   const date = $('bDate').value;
@@ -597,6 +648,7 @@ function saveBreakdown(e){
   if(!repairActivity) return toast('Enter spares used or repair activity', true);
 
   v.currentKm = Math.max(v.currentKm, km);
+  v.lastKmDate = date;
 
   const detailsText = 'Fault: ' + fault + ' | Spares Used / Repair Activity: ' + repairActivity;
   state.history.unshift({
@@ -611,8 +663,50 @@ function saveBreakdown(e){
   hide('svcModal');
   renderAll();
   toast('✅ Breakdown repair record successfully added to Service History!');
-  document.getElementById('breakdownLogForm').reset();
+  $('bFault').value = '';
+  $('bRepairActivity').value = '';
   $('breakdownSection').style.display = 'none';
+}
+
+// ----- driver remote update portal -----
+let activeDriverId=null;
+function checkDriverPortal(){
+  const params=new URLSearchParams(window.location.search);
+  const did=params.get('driver_update');
+  if(!did){$('driverPortal').style.display='none';$('viewDash').style.display='block';return;}
+  activeDriverId=did;
+  $('viewDash').style.display='none';$('viewRec').style.display='none';
+  document.querySelector('nav').style.display='none';
+  $('driverPortal').style.display='block';
+  const v=get(did);
+  if(!v){
+    $('dpInfo').textContent='Invalid or unknown vehicle link.';
+    $('dpForm').style.display='none';
+    return;
+  }
+  $('dpForm').style.display='block';
+  $('dpInfo').innerHTML='<b>Vehicle: '+esc(v.regn)+'</b> • Unit: '+esc(v.unit||'—')+' • Current KM: <b>'+fmt(v.currentKm)+' KM</b>'+(v.lastKmDate?' • Last Updated: '+fmtD(v.lastKmDate):'');
+  $('dpKm').value=v.currentKm;
+  $('dpDate').value=todayISO();
+}
+function submitDriverUpdate(){
+  const v=get(activeDriverId);if(!v)return;
+  const km=parseInt($('dpKm').value);
+  const dt=$('dpDate').value||todayISO();
+  if(isNaN(km)||km<0)return toast('Enter a valid KM',true);
+  if(!pISO(dt))return toast('Select a valid date',true);
+  if(dt>todayISO())return toast('Future dates are not allowed',true);
+  if(km<v.currentKm)return toast('KM cannot be less than current KM ('+fmt(v.currentKm)+')',true);
+  const prev=v.currentKm;
+  v.currentKm=km;
+  v.lastKmDate=dt;
+  state.history.unshift({date:dt,regn:v.regn,type:'Driver Link Update',km:km,details:'Updated via driver link ('+fmt(prev)+' → '+fmt(km)+' KM on '+fmtD(dt)+')'});
+  save();
+  toast('✅ KM & Date updated for '+v.regn);
+  $('dpInfo').innerHTML='✅ Updated! <b>'+esc(v.regn)+'</b> is now at <b>'+fmt(v.currentKm)+' KM</b> on <b>'+fmtD(dt)+'</b>.';
+}
+function exitDriverPortal(){
+  window.location.href=window.location.origin+window.location.pathname;
 }
 
 // ----- backup / restore -----
@@ -635,6 +729,7 @@ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dip=e;$('in
 function doInstall(){if(!dip)return;dip.prompt();dip.userChoice.then(()=>{dip=null;$('instBtn').style.display='none';});}
 if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('service-worker.js').catch(()=>{});});}
 renderAll();
+checkDriverPortal();
 </script>
 </body>
 </html>
