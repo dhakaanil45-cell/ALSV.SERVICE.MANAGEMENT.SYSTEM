@@ -199,10 +199,10 @@ nav button.on{color:#fff;background:rgba(59,130,246,.2);box-shadow:inset 0 3px 0
   <div class="mt" id="vehT">➕ Add Armado</div><div class="ms">Mahindra Armado — enter vehicle details</div>
   <div class="r2"><div class="fl"><label>Registration No. *</label><input class="inp" id="fRegn" style="text-transform:uppercase" placeholder="e.g. 12 A 345678"></div><div class="fl"><label>Vintage (Year) *</label><input class="inp" id="fVin" type="number" placeholder="e.g. 2019"></div></div>
   <div class="r2"><div class="fl"><label>Unit</label><input class="inp" id="fUnit" placeholder="Unit"></div><div class="fl"><label>Formation</label><input class="inp" id="fForm" placeholder="Formation"></div></div>
-  <div class="r2"><div class="fl"><label>Current KM (Odometer) *</label><input class="inp" id="fKm" type="number" min="0" placeholder="e.g. 11400"></div><div class="fl"><label>Last Service KM</label><input class="inp" id="fLastKm" type="number" min="0" placeholder="e.g. 5000"></div></div>
+  <div class="r2"><div class="fl"><label>Current KM (Odometer) *</label><input class="inp" id="fKm" type="number" min="0" placeholder="e.g. 2050"></div><div class="fl"><label>Last Service KM</label><input class="inp" id="fLastKm" type="number" min="0" placeholder="e.g. 0"></div></div>
   <div class="fl"><small>If the service was done before the milestone (e.g. at 9,500 km for the 10,000 km service), enter the milestone (10,000) as Last Service KM.</small></div>
   <div class="r2"><div class="fl"><label>Last Service Date</label><input class="inp" id="fLastDate" type="date"></div><div class="fl"><label>Date Entered Service</label><input class="inp" id="fInSvc" type="date"></div></div>
-  <div class="fl"><small>⏱ At least one date is required for the 1-year Engine Oil + Filter rule. The last service date is used if available; otherwise the date entered service is used.</small></div>
+  <div class="fl"><small>⏱ At least one date is required for the 12-month Engine Oil + Filter rule. The last service date is used if available; otherwise the date entered service is used.</small></div>
   <div style="background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.2);border-radius:8px;padding:10px;margin-bottom:6px">
     <div style="font-size:10px;letter-spacing:1px;color:var(--green);text-transform:uppercase;margin-bottom:8px">👤 Driver (for notifications, optional)</div>
     <div class="fl"><label>Driver Name</label><input class="inp" id="fDn"></div>
@@ -219,14 +219,12 @@ nav button.on{color:#fff;background:rgba(59,130,246,.2);box-shadow:inset 0 3px 0
   <div class="tabs"><button id="modeFull" onclick="setMode('full')">🔧 Full Service (KM)</button><button id="modeOil" onclick="setMode('oil')">🛢️ Engine Oil + Filter</button></div>
   <div class="r2"><div class="fl"><label>Actual KM *</label><input class="inp" id="svcKm" type="number" min="0"></div><div class="fl"><label>Date *</label><input class="inp" id="svcDate" type="date"></div></div>
   <div id="svcFull"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><div class="ms" style="margin:0">Tick the tasks that have been completed</div><button class="btn btn-o btn-s" onclick="toggleAll()">Select all / Clear</button></div><div class="tn2" id="svcNote"></div><div id="svcTasks"></div></div>
-  <div id="svcOil" style="display:none"><div class="ms">Only the Engine Oil + Filter were changed (both Replace)? This does not affect the KM-milestone service; it only restarts the 1-year timer.</div></div>
+  <div id="svcOil" style="display:none"><div class="ms">Only the Engine Oil + Filter were changed (both Replace)? This does not affect the KM-milestone service; it only restarts the 12-month timer.</div></div>
   
-  <!-- LOG BREAKDOWN SERVICE BUTTON -->
   <button type="button" onclick="toggleBreakdownForm()" style="background: #ef4444; color: #fff; border: none; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 14px; width: 100%;">
       LOG BREAKDOWN SERVICE
   </button>
 
-  <!-- Breakdown Form (Hidden by default) -->
   <div id="breakdownSection" style="display: none; background: var(--panel); padding: 14px; border-radius: 10px; margin-top: 10px; border: 1px solid #ef4444;">
       <h4 style="color: #ef4444; margin-bottom: 8px; font-family: 'Teko', sans-serif; font-size: 18px;">Breakdown & Repair Entry</h4>
       <div id="breakdownLogForm" style="display: flex; flex-direction: column; gap: 8px;">
@@ -254,12 +252,10 @@ nav button.on{color:#fff;background:rgba(59,130,246,.2);box-shadow:inset 0 3px 0
 <script>
 // ===LOGIC-START===
 const WARN_KM=500, WARN_DAYS=30, OIL_MONTHS=12;
-// Mahindra Defence Systems Manual Chart (pp. 27-29) columns in KM
 const MS=[2000,4000,10000,15000,20000,25000,30000,35000,40000,45000,50000,55000,60000,65000,70000,75000,80000,85000,90000,95000,100000];
 const FROM_2000=[2000,4000,10000,15000,20000,25000,30000,35000,40000,45000,50000,55000,60000,65000,70000,75000,80000,85000,90000,95000,100000];
 const FROM_4000=[4000,10000,15000,20000,25000,30000,35000,40000,45000,50000,55000,60000,65000,70000,75000,80000,85000,90000,95000,100000];
 const FROM_10000=[10000,15000,20000,25000,30000,35000,40000,45000,50000,55000,60000,65000,70000,75000,80000,85000,90000,95000,100000];
-const FROM_15000=[15000,20000,25000,30000,35000,40000,45000,50000,55000,60000,65000,70000,75000,80000,85000,90000,95000,100000];
 const E15_OIL=[15000,30000,45000,60000,75000,90000];
 const E15_FIL=[15000,30000,45000,60000,75000,90000,100000];
 const E10_ODD=[15000,25000,35000,45000,55000,65000,75000,85000,95000];
@@ -267,7 +263,6 @@ const E10_TEN=[10000,20000,30000,40000,50000,60000,70000,80000,90000,100000];
 
 function T(name,s){const m={};(s.I||[]).forEach(k=>m[k]='I');(s.L||[]).forEach(k=>m[k]='L');(s.R||[]).forEach(k=>m[k]='R');return{name,map:m,everyKm:s.everyKm||0,note:s.note||''};}
 
-// Matched strictly to Mahindra Defence Systems Limited Recommended Maintenance Schedule Chart (pp. 27-29)
 const SCHEDULE=[
  {cat:'Engine',tasks:[
   T('Engine Oil',{I:[4000,10000,20000,25000,35000,40000,50000,55000,65000,70000,80000,85000,95000,100000],R:[2000,...E15_OIL]}),
@@ -324,13 +319,17 @@ function taskAction(t,absKm){
   return a;
 }
 function nextMilestoneAfter(km){
-  const base=Math.floor(km/100000)*100000;
-  for(const m of MS){if(base+m>km)return base+m;}
+  const k=+km||0;
+  if(k<2000)return 2000;
+  const base=Math.floor(k/100000)*100000;
+  for(const m of MS){if(base+m>k)return base+m;}
   return base+100000+MS[0];
 }
 function lastMilestoneAtOrBelow(km){
-  const base=Math.floor(km/100000)*100000;
-  for(let i=MS.length-1;i>=0;i--){if(base+MS[i]<=km)return base+MS[i];}
+  const k=+km||0;
+  if(k<2000)return 0;
+  const base=Math.floor(k/100000)*100000;
+  for(let i=MS.length-1;i>=0;i--){if(base+MS[i]<=k)return base+MS[i];}
   return base;
 }
 function msInRange(lo,hi){const out=[];let m=nextMilestoneAfter(lo);while(m<=hi){out.push(m);m=nextMilestoneAfter(m);}return out;}
@@ -727,7 +726,7 @@ function restore(ev){
 let dip=null;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dip=e;$('instBtn').style.display='inline-block';});
 function doInstall(){if(!dip)return;dip.prompt();dip.userChoice.then(()=>{dip=null;$('instBtn').style.display='none';});}
-if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('service-worker.js').catch(()=>{});});}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('service-worker.js?v=20261120').catch(()=>{});});}
 renderAll();
 checkDriverPortal();
 </script>
